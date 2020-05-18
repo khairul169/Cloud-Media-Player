@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:cmp/models/ApiResult.dart';
 
-const API_URL = 'https://192.168.43.48/';
+const API_URL = 'http://192.168.43.48/cmp-api/';
 
 enum RequestMethod { Get, Post }
 
@@ -20,27 +20,31 @@ class ApiHelper {
     String url, {
     dynamic body,
   }) async {
-    var result = ApiResult(isError: true);
+    var headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
 
     try {
       // Response handler
       http.Response response;
 
       if (method == RequestMethod.Post) {
-        response = await http.post(url, body: jsonEncode(body));
+        response = await http.post(
+          url,
+          body: jsonEncode(body),
+          headers: headers,
+        );
       } else {
-        response = await http.get(url);
+        response = await http.get(url, headers: headers);
       }
 
       // Parse result
-      result = ApiResult.parse(response.body);
-
-      if (result.isError) {
-        throw new Exception('API Error! ' + result.message);
-      }
+      var result = ApiResult.parse(jsonDecode(response.body));
+      return result;
     } catch (ex) {
       print(ex);
+      return ApiResult(isError: true);
     }
-    return result;
   }
 }
