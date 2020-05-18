@@ -45,6 +45,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
       androidNotificationChannelName: 'Cloud Media Player',
       notificationColor: 0xFF2196f3,
       androidNotificationIcon: 'mipmap/ic_launcher',
+      enableQueue: true,
     );
   }
 
@@ -93,11 +94,14 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   void onPlayMediaItem(MediaItem media) async {
+    String url = media.extras['url'];
+    if (url == null) return;
+
     if (isPlaying) {
       onStop();
     }
 
-    await player.setUrl(media.id);
+    await player.setUrl(url);
     AudioServiceBackground.setMediaItem(media);
     onPlay();
   }

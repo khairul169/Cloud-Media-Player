@@ -1,7 +1,7 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cmp/services/AudioPlayerTask.dart';
 import 'package:flutter/material.dart';
-import 'package:cmp/screens/Home/Home.dart';
+import 'package:cmp/screens/Home.dart';
 
 class App extends StatelessWidget {
   void onAudioService() {

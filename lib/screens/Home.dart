@@ -1,6 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cmp/models/MediaDetail.dart';
+import 'package:cmp/models/Media.dart';
 import 'package:cmp/services/ApiHelper.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String test;
-  List<MediaDetail> mediaList;
+  List<Media> mediaList;
   ScaffoldState scaffold;
 
   @override
@@ -31,9 +31,8 @@ class _HomeState extends State<Home> {
     }
 
     try {
-      var itemList = List.from(result.data)
-          .map((item) => MediaDetail.fromJson(item))
-          .toList();
+      var itemList =
+          List.from(result.data).map((item) => Media.fromJson(item)).toList();
 
       setState(() {
         mediaList = itemList;
@@ -43,7 +42,7 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void onStartMedia(MediaDetail media) {
+  void onStartMedia(Media media) {
     AudioService.playMediaItem(media.toMediaItem());
   }
 
