@@ -7,6 +7,10 @@ const API_URL = 'http://192.168.43.48/cmp-api/';
 enum RequestMethod { Get, Post }
 
 class ApiHelper {
+  static getUrl(String url) {
+    return API_URL + url;
+  }
+
   static Future<ApiResult> get(String url) {
     return request(RequestMethod.Get, API_URL + url);
   }

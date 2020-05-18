@@ -1,3 +1,4 @@
+import 'package:audio_service/audio_service.dart';
 import 'package:flutter/material.dart';
 import 'package:cmp/screens/Home/Home.dart';
 
@@ -9,7 +10,7 @@ class App extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: Home(),
+      home: AudioServiceWidget(child: Home()),
       debugShowCheckedModeBanner: false,
     );
   }
