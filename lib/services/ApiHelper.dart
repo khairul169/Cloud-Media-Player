@@ -47,8 +47,10 @@ class ApiHelper {
       var result = ApiResult.parse(jsonDecode(response.body));
       return result;
     } catch (ex) {
-      print(ex);
-      return ApiResult(isError: true);
+      return ApiResult(
+        isError: true,
+        message: 'Error unexpected',
+      );
     }
   }
 }

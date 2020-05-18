@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cmp/models/MediaDetail.dart';
 import 'package:cmp/services/ApiHelper.dart';
 import 'package:cmp/services/AudioPlayerTask.dart';
@@ -12,6 +13,7 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   String test;
   List<MediaDetail> mediaList;
+  ScaffoldState scaffold;
 
   @override
   void initState() {
@@ -24,19 +26,23 @@ class _HomeState extends State<Home> {
   }
 
   void fetchData() async {
-    var result = await ApiHelper.get('media/');
+    var result = await ApiHelper.get('media');
     if (result.isError) {
-      print(result.message);
+      scaffold.showSnackBar(SnackBar(content: Text(result.message)));
       return;
     }
 
-    var itemList = List.from(result.data)
-        .map((item) => MediaDetail.fromJson(item))
-        .toList();
+    try {
+      var itemList = List.from(result.data)
+          .map((item) => MediaDetail.fromJson(item))
+          .toList();
 
-    setState(() {
-      mediaList = itemList;
-    });
+      setState(() {
+        mediaList = itemList;
+      });
+    } catch (error) {
+      scaffold.showSnackBar(SnackBar(content: Text('Failed parsing data.')));
+    }
   }
 
   void onStartMedia(MediaDetail media) {
@@ -66,8 +72,8 @@ class _HomeState extends State<Home> {
         Center(
           child: SizedBox(
             height: 200,
-            child: Image.network(
-              media.image,
+            child: CachedNetworkImage(
+              imageUrl: media.image,
               fit: BoxFit.cover,
             ),
           ),
@@ -104,7 +110,10 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('Cloud Media Player'),
       ),
-      body: mediaList != null ? buildMediaList() : Text('Loading...'),
+      body: Builder(builder: (context) {
+        scaffold = Scaffold.of(context);
+        return mediaList != null ? buildMediaList() : Text('Loading...');
+      }),
     );
   }
 }
