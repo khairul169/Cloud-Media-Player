@@ -2,7 +2,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cmp/models/MediaDetail.dart';
 import 'package:cmp/services/ApiHelper.dart';
-import 'package:cmp/services/AudioPlayerTask.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -19,7 +18,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     fetchData();
-    AudioPlayerTask.startService();
     AudioService.customEventStream.listen((data) {
       print(data);
     });
@@ -66,41 +64,40 @@ class _HomeState extends State<Home> {
 
   Widget buildMediaItem(_, index) {
     var media = mediaList[index];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: <Widget>[
-        Center(
-          child: SizedBox(
-            height: 200,
-            child: CachedNetworkImage(
-              imageUrl: media.image,
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.all(16),
-          child: Column(
+    return Card(
+      child: InkWell(
+        onTap: () => onStartMedia(media),
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text('Title: ' + media.title),
-              Text('Artist: ' + media.artist),
-              Text('Album: ' + media.album),
-              Text('Year: ' + media.year.toString()),
-              SizedBox(height: 16),
-              RaisedButton(
-                color: Colors.blue,
-                child: Text('Play', style: TextStyle(color: Colors.white)),
-                onPressed: () => onStartMedia(media),
+              Center(
+                child: SizedBox(
+                  width: 64,
+                  height: 64,
+                  child: CachedNetworkImage(
+                    imageUrl: media.image,
+                    fit: BoxFit.cover,
+                  ),
+                ),
               ),
-              RaisedButton(
-                child: Text('Stop'),
-                onPressed: onStop,
+              SizedBox(
+                width: 16,
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(media.title),
+                    Text(media.artist),
+                  ],
+                ),
               ),
             ],
           ),
         ),
-      ],
+      ),
     );
   }
 
