@@ -6,7 +6,25 @@ class Playlist {
 
   Playlist(this.items);
 
+  factory Playlist.fromMedia(Media item) => Playlist([item]);
+
+  factory Playlist.fromJson(dynamic json) {
+    var itemList = List.from(json).map((item) => Media.fromJson(item)).toList();
+    return Playlist(itemList);
+  }
+
+  addMedia(Media item) {
+    items.add(item);
+  }
+
+  removeMedia(Media item) {
+    items.remove(item);
+  }
+
   List<MediaItem> toQueue() {
-    return items.map((item) => item.toMediaItem());
+    return items.asMap().entries.map((entry) {
+      var key = entry.key;
+      return entry.value.toMediaItem(key);
+    }).toList();
   }
 }

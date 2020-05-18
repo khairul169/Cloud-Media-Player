@@ -27,8 +27,8 @@ class Media {
       year: json['year'],
       image: json['image']);
 
-  MediaItem toMediaItem() => MediaItem(
-      id: id.toString(),
+  MediaItem toMediaItem(int key) => MediaItem(
+      id: key.toString(),
       title: Utils.isEmpty(title) ? 'Playing...' : title,
       album: album,
       artist: Utils.isEmpty(artist) ? 'Unknown Artist' : artist,

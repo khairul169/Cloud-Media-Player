@@ -1,6 +1,6 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:cmp/models/Media.dart';
+import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/services/ApiHelper.dart';
 import 'package:flutter/material.dart';
 
@@ -11,7 +11,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   String test;
-  List<Media> mediaList;
+  Playlist mediaList;
   ScaffoldState scaffold;
 
   @override
@@ -31,9 +31,7 @@ class _HomeState extends State<Home> {
     }
 
     try {
-      var itemList =
-          List.from(result.data).map((item) => Media.fromJson(item)).toList();
-
+      var itemList = Playlist.fromJson(result.data);
       setState(() {
         mediaList = itemList;
       });
@@ -42,8 +40,9 @@ class _HomeState extends State<Home> {
     }
   }
 
-  void onStartMedia(Media media) {
-    AudioService.playMediaItem(media.toMediaItem());
+  void onStartMedia(int id) {
+    AudioService.replaceQueue(mediaList.toQueue());
+    AudioService.playFromMediaId(id.toString());
   }
 
   void onPlay() {
@@ -56,16 +55,16 @@ class _HomeState extends State<Home> {
 
   Widget buildMediaList() {
     return ListView.builder(
-      itemCount: mediaList.length,
+      itemCount: mediaList.items.length,
       itemBuilder: buildMediaItem,
     );
   }
 
   Widget buildMediaItem(_, index) {
-    var media = mediaList[index];
+    var media = mediaList.items[index];
     return Card(
       child: InkWell(
-        onTap: () => onStartMedia(media),
+        onTap: () => onStartMedia(index),
         child: Padding(
           padding: EdgeInsets.all(16.0),
           child: Row(

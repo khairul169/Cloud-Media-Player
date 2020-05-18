@@ -36,7 +36,9 @@ class AudioPlayerTask extends BackgroundAudioTask {
   final player = AudioPlayer();
   final completer = Completer();
 
+  List<MediaItem> queue;
   bool isPlaying = false;
+  int curIndex = -1;
 
   static startService() {
     // Start audio service
@@ -84,12 +86,12 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   void onSkipToNext() {
-    AudioServiceBackground.sendCustomEvent('next');
+    skipIndex(1);
   }
 
   @override
   void onSkipToPrevious() {
-    AudioServiceBackground.sendCustomEvent('prev');
+    skipIndex(-1);
   }
 
   @override
@@ -104,6 +106,34 @@ class AudioPlayerTask extends BackgroundAudioTask {
     await player.setUrl(url);
     AudioServiceBackground.setMediaItem(media);
     onPlay();
+  }
+
+  @override
+  Future<void> onReplaceQueue(List<MediaItem> items) async {
+    queue = items;
+  }
+
+  @override
+  void onPlayFromMediaId(String mediaId) {
+    try {
+      var id = int.tryParse(mediaId, radix: 10);
+      playMedia(id);
+    } catch (error) {}
+  }
+
+  void playMedia(int id) {
+    curIndex = (id < 0 ? 0 : (id >= queue.length ? queue.length - 1 : id));
+    onPlayMediaItem(queue[curIndex]);
+  }
+
+  void skipIndex(int rel) {
+    var newIndex = curIndex + rel;
+    if (newIndex < 0) {
+      newIndex = queue.length - 1;
+    } else if (newIndex >= queue.length) {
+      newIndex = 0;
+    }
+    playMedia(newIndex);
   }
 
   MediaControl getPlayPauseControl() {
