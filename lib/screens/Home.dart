@@ -2,6 +2,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/services/ApiHelper.dart';
+import 'package:cmp/services/AudioPlayerTask.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -18,9 +19,7 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     fetchData();
-    AudioService.customEventStream.listen((data) {
-      print(data);
-    });
+    setRepeatMode(AudioPlayerRepeat.All);
   }
 
   void fetchData() async {
@@ -41,7 +40,13 @@ class _HomeState extends State<Home> {
   }
 
   void onStartMedia(int id) {
-    AudioService.replaceQueue(mediaList.toQueue());
+    // Update playlist
+    var queue = mediaList.toQueue();
+    if (AudioService.queue != queue) {
+      AudioService.replaceQueue(queue);
+    }
+
+    // Play media
     AudioService.playFromMediaId(id.toString());
   }
 
@@ -51,6 +56,10 @@ class _HomeState extends State<Home> {
 
   void onStop() {
     AudioService.pause();
+  }
+
+  void setRepeatMode(AudioPlayerRepeat mode) {
+    AudioService.customAction('setRepeatMode', mode.index);
   }
 
   Widget buildMediaList() {
@@ -107,7 +116,33 @@ class _HomeState extends State<Home> {
       ),
       body: Builder(builder: (context) {
         scaffold = Scaffold.of(context);
-        return mediaList != null ? buildMediaList() : Text('Loading...');
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: mediaList != null ? buildMediaList() : Text('Loading...'),
+            ),
+            StreamBuilder<MediaItem>(
+                stream: AudioService.currentMediaItemStream,
+                builder: (context, media) => StreamBuilder<PlaybackState>(
+                    stream: AudioService.playbackStateStream,
+                    builder: (context, event) {
+                      var title = media.data?.title ?? '-';
+                      var duration = media.data?.duration ?? 0;
+                      var position = event.data?.position ?? 0;
+                      return Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Text('Title: $title'),
+                              Text('Position: $position'),
+                              Text('Duration: $duration'),
+                            ]),
+                      );
+                    })),
+          ],
+        );
       }),
     );
   }

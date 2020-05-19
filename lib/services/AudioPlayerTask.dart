@@ -11,26 +11,32 @@ MediaControl playControl = MediaControl(
   label: 'Play',
   action: MediaAction.play,
 );
+
 MediaControl pauseControl = MediaControl(
   androidIcon: 'drawable/ic_action_pause',
   label: 'Pause',
   action: MediaAction.pause,
 );
+
 MediaControl skipToNextControl = MediaControl(
   androidIcon: 'drawable/ic_action_skip_next',
   label: 'Next',
   action: MediaAction.skipToNext,
 );
+
 MediaControl skipToPreviousControl = MediaControl(
   androidIcon: 'drawable/ic_action_skip_previous',
   label: 'Previous',
   action: MediaAction.skipToPrevious,
 );
+
 MediaControl stopControl = MediaControl(
   androidIcon: 'drawable/ic_action_stop',
   label: 'Stop',
   action: MediaAction.stop,
 );
+
+enum AudioPlayerRepeat { None, Single, All }
 
 class AudioPlayerTask extends BackgroundAudioTask {
   final player = AudioPlayer();
@@ -39,6 +45,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   List<MediaItem> queue;
   bool isPlaying = false;
   int curIndex = -1;
+  AudioPlayerRepeat repeatMode = AudioPlayerRepeat.None;
 
   static startService() {
     // Start audio service
@@ -54,7 +61,20 @@ class AudioPlayerTask extends BackgroundAudioTask {
   @override
   Future<void> onStart() async {
     isPlaying = false;
+
+    // Listen to state change
+    var playCompleteListener = player.playbackStateStream
+        .where((state) => state == AudioPlaybackState.completed)
+        .listen((state) => onPlaybackComplete());
+    var positionListener = player.getPositionStream().listen((data) {
+      var position = data.inSeconds ?? 0;
+      updateState(position: position);
+    });
+
+    // Wait for free
     await completer.future;
+    playCompleteListener.cancel();
+    positionListener.cancel();
   }
 
   @override
@@ -73,6 +93,19 @@ class AudioPlayerTask extends BackgroundAudioTask {
     await player.stop();
     isPlaying = false;
     updateState();
+  }
+
+  void onPlaybackComplete() {
+    // Stop player
+    onStop();
+
+    // Repeat media
+    if (repeatMode == AudioPlayerRepeat.Single) {
+      playMedia(curIndex);
+    } else if (repeatMode == AudioPlayerRepeat.All ||
+        curIndex < queue.length - 1) {
+      skipIndex(1);
+    }
   }
 
   @override
@@ -103,8 +136,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
       onStop();
     }
 
-    await player.setUrl(url);
-    AudioServiceBackground.setMediaItem(media);
+    var duration = await player.setUrl(url);
+    var newMedia = media.copyWith(duration: duration.inSeconds);
+
+    AudioServiceBackground.setMediaItem(newMedia);
     onPlay();
   }
 
@@ -119,6 +154,19 @@ class AudioPlayerTask extends BackgroundAudioTask {
       var id = int.tryParse(mediaId, radix: 10);
       playMedia(id);
     } catch (error) {}
+  }
+
+  @override
+  Future onCustomAction(String name, arguments) async {
+    switch (name) {
+      case 'setRepeatMode':
+        var mode = AudioPlayerRepeat.values
+            .firstWhere((value) => value.index == arguments);
+        setRepeatMode(mode);
+        break;
+      default:
+        break;
+    }
   }
 
   void playMedia(int id) {
@@ -136,6 +184,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
     playMedia(newIndex);
   }
 
+  void setRepeatMode(AudioPlayerRepeat mode) {
+    repeatMode = mode;
+  }
+
   MediaControl getPlayPauseControl() {
     return isPlaying ? pauseControl : playControl;
   }
@@ -144,16 +196,17 @@ class AudioPlayerTask extends BackgroundAudioTask {
     return [
       skipToPreviousControl,
       getPlayPauseControl(),
-      stopControl,
       skipToNextControl,
     ];
   }
 
-  void updateState() {
+  void updateState({int position}) {
     AudioServiceBackground.setState(
       controls: getControls(),
       basicState:
           isPlaying ? BasicPlaybackState.playing : BasicPlaybackState.paused,
+      position:
+          position == null ? player.playbackEvent.position.inSeconds : position,
     );
   }
 }
