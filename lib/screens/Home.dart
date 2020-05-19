@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/services/ApiHelper.dart';
 import 'package:cmp/services/AudioPlayerTask.dart';
@@ -83,8 +82,8 @@ class _HomeState extends State<Home> {
                 child: SizedBox(
                   width: 64,
                   height: 64,
-                  child: CachedNetworkImage(
-                    imageUrl: media.image,
+                  child: Image.network(
+                    media.image,
                     fit: BoxFit.cover,
                   ),
                 ),
