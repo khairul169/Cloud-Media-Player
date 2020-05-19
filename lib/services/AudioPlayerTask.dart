@@ -67,7 +67,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
         .where((state) => state == AudioPlaybackState.completed)
         .listen((state) => onPlaybackComplete());
     var positionListener = player.getPositionStream().listen((data) {
-      var position = data.inSeconds ?? 0;
+      var position = data?.inSeconds ?? 0;
       updateState(position: position);
     });
 
@@ -78,10 +78,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   @override
-  void onPlay() {
+  void onPlay() async {
     if (isPlaying) return;
 
-    player.play();
+    await player.play();
     isPlaying = true;
     updateState();
   }
@@ -137,7 +137,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     }
 
     var duration = await player.setUrl(url);
-    var newMedia = media.copyWith(duration: duration.inSeconds);
+    var newMedia = media.copyWith(duration: duration?.inSeconds ?? 0);
 
     AudioServiceBackground.setMediaItem(newMedia);
     onPlay();
@@ -201,12 +201,15 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   void updateState({int position}) {
+    // Playback position
+    final pbPos = player.playbackEvent.position?.inSeconds;
+
+    // Set state
     AudioServiceBackground.setState(
       controls: getControls(),
       basicState:
           isPlaying ? BasicPlaybackState.playing : BasicPlaybackState.paused,
-      position:
-          position == null ? player.playbackEvent.position.inSeconds : position,
+      position: position == null ? pbPos : position,
     );
   }
 }

@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io';
+import 'package:cmp/services/FileUploadRequest.dart';
 import 'package:http/http.dart' as http;
 import 'package:cmp/models/ApiResult.dart';
 
@@ -52,5 +54,22 @@ class ApiHelper {
         message: 'Error unexpected',
       );
     }
+  }
+
+  static Future<http.Response> uploadFile(
+    String url,
+    File file, {
+    Function(int, int) onProgress,
+  }) async {
+    if (file == null) return null;
+
+    final uri = Uri.parse(API_URL + url);
+    final request = new FileUploadRequest(uri, onProgress: onProgress);
+    await request.addFile('media', file);
+
+    // Send response
+    final response = await request.send();
+    final data = await http.Response.fromStream(response);
+    return data;
   }
 }

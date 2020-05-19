@@ -27,6 +27,7 @@ dependencies:
   http: ^0.12.1
   audio_service: ^0.8.0
   just_audio: ^0.1.9
+  file_picker: ^1.9.0+1
 
 dev_dependencies:
   flutter_test:

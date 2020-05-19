@@ -1,15 +1,16 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cmp/models/Playlist.dart';
+import 'package:cmp/screens/Upload.dart';
 import 'package:cmp/services/ApiHelper.dart';
 import 'package:cmp/services/AudioPlayerTask.dart';
 import 'package:flutter/material.dart';
 
-class Home extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  _HomeState createState() => _HomeState();
+  _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeScreenState extends State<HomeScreen> {
   String test;
   Playlist mediaList;
   ScaffoldState scaffold;
@@ -61,6 +62,12 @@ class _HomeState extends State<Home> {
     AudioService.customAction('setRepeatMode', mode.index);
   }
 
+  void onAddPress() {
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (context) => UploadScreen(),
+    ));
+  }
+
   Widget buildMediaList() {
     return ListView.builder(
       itemCount: mediaList.items.length,
@@ -107,6 +114,30 @@ class _HomeState extends State<Home> {
     );
   }
 
+  StreamBuilder<MediaItem> buildPlaybackPanel() {
+    return StreamBuilder<MediaItem>(
+      stream: AudioService.currentMediaItemStream,
+      builder: (context, media) => StreamBuilder<PlaybackState>(
+        stream: AudioService.playbackStateStream,
+        builder: (context, event) {
+          var title = media.data?.title ?? '-';
+          var duration = media.data?.duration ?? 0;
+          var position = event.data?.position ?? 0;
+          return Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text('Title: $title'),
+                  Text('Position: $position'),
+                  Text('Duration: $duration'),
+                ]),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -121,28 +152,14 @@ class _HomeState extends State<Home> {
             Expanded(
               child: mediaList != null ? buildMediaList() : Text('Loading...'),
             ),
-            StreamBuilder<MediaItem>(
-                stream: AudioService.currentMediaItemStream,
-                builder: (context, media) => StreamBuilder<PlaybackState>(
-                    stream: AudioService.playbackStateStream,
-                    builder: (context, event) {
-                      var title = media.data?.title ?? '-';
-                      var duration = media.data?.duration ?? 0;
-                      var position = event.data?.position ?? 0;
-                      return Padding(
-                        padding: EdgeInsets.all(16),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Text('Title: $title'),
-                              Text('Position: $position'),
-                              Text('Duration: $duration'),
-                            ]),
-                      );
-                    })),
+            buildPlaybackPanel(),
           ],
         );
       }),
+      floatingActionButton: FloatingActionButton(
+        child: Icon(Icons.add),
+        onPressed: onAddPress,
+      ),
     );
   }
 }

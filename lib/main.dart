@@ -17,7 +17,7 @@ class App extends StatelessWidget {
       ),
       home: AudioServiceWidget(child: Builder(builder: (context) {
         onAudioService();
-        return Home();
+        return HomeScreen();
       })),
       debugShowCheckedModeBanner: false,
     );
