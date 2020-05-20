@@ -42,11 +42,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void onStartMedia(int id) {
     var test = Media(
-      title: '(鹿乃) Kano - Glow',
-      url: 'http://192.168.43.48:3000/get/uef6IIb9jUE',
-      artist: 'Test haha',
-      album: 'test album',
-      image: 'http://i.ytimg.com/vi/uef6IIb9jUE/hqdefault.jpg',
+      url: 'http://192.168.43.48:3000/get/u5v7_Hzuz7Q',
+      image: 'http://i.ytimg.com/vi/u5v7_Hzuz7Q/hqdefault.jpg',
     );
 
     AudioService.playMediaItem(test.toMediaItem());
