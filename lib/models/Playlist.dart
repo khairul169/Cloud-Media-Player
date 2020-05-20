@@ -24,7 +24,7 @@ class Playlist {
   List<MediaItem> toQueue() {
     return items.asMap().entries.map((entry) {
       var key = entry.key;
-      return entry.value.toMediaItem(key);
+      return entry.value.toMediaItem(key: key.toString());
     }).toList();
   }
 }

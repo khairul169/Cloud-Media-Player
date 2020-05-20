@@ -1,6 +1,5 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cmp/public/Utils.dart';
-import 'package:cmp/services/ApiHelper.dart';
 
 class Media {
   final int id;
@@ -10,6 +9,9 @@ class Media {
   final int year;
   final String image;
 
+  String url;
+  bool local;
+
   Media({
     this.id,
     this.title,
@@ -17,6 +19,8 @@ class Media {
     this.album,
     this.year,
     this.image,
+    this.url,
+    this.local,
   });
 
   factory Media.fromJson(dynamic json) => Media(
@@ -25,17 +29,19 @@ class Media {
       artist: json['artist'],
       album: json['album'],
       year: json['year'],
-      image: json['image']);
+      image: json['image'],
+      url: json['url']);
 
-  MediaItem toMediaItem(int key) => MediaItem(
-      id: key.toString(),
+  MediaItem toMediaItem({String key, String albumName}) => MediaItem(
+      id: key,
       title: Utils.isEmpty(title) ? 'Playing...' : title,
-      album: album,
-      artist: Utils.isEmpty(artist) ? 'Unknown Artist' : artist,
+      album: albumName ?? album,
+      artist: Utils.isEmpty(artist) ? 'Unknown' : artist,
       artUri: image,
-      extras: {'url': getUrl()});
+      extras: {'url': url, 'local': local});
 
-  getUrl() {
-    return ApiHelper.getUrl('media/get/$id');
+  void setLocalPath(String path) {
+    url = path;
+    local = true;
   }
 }

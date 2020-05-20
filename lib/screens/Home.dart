@@ -1,4 +1,5 @@
 import 'package:audio_service/audio_service.dart';
+import 'package:cmp/models/Media.dart';
 import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/screens/Upload.dart';
 import 'package:cmp/services/ApiHelper.dart';
@@ -40,13 +41,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void onStartMedia(int id) {
-    // Update playlist
-    var queue = mediaList.toQueue();
-    if (AudioService.queue != queue) {
-      AudioService.replaceQueue(queue);
-    }
-
     // Play media
+    var queue = mediaList.toQueue();
+    AudioService.replaceQueue(queue);
     AudioService.playFromMediaId(id.toString());
   }
 

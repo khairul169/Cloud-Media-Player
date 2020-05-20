@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:audio_service/audio_service.dart';
 import 'package:just_audio/just_audio.dart';
 
+enum AudioPlayerRepeat { None, Single, All }
+
 void audioTaskEntry() {
   AudioServiceBackground.run(() => AudioPlayerTask());
 }
@@ -36,16 +38,14 @@ MediaControl stopControl = MediaControl(
   action: MediaAction.stop,
 );
 
-enum AudioPlayerRepeat { None, Single, All }
-
 class AudioPlayerTask extends BackgroundAudioTask {
   final player = AudioPlayer();
   final completer = Completer();
 
   List<MediaItem> queue;
-  bool isPlaying = false;
   int curIndex = -1;
   AudioPlayerRepeat repeatMode = AudioPlayerRepeat.None;
+  bool queueMode = false;
 
   static startService() {
     // Start audio service
@@ -60,14 +60,12 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   Future<void> onStart() async {
-    isPlaying = false;
-
     // Listen to state change
     var playCompleteListener = player.playbackStateStream
         .where((state) => state == AudioPlaybackState.completed)
         .listen((state) => onPlaybackComplete());
     var positionListener = player.getPositionStream().listen((data) {
-      var position = data?.inSeconds ?? 0;
+      var position = data?.inMilliseconds ?? 0;
       updateState(position: position);
     });
 
@@ -79,80 +77,60 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   @override
   void onPlay() async {
-    if (isPlaying) return;
+    if (isWaiting()) return;
 
     await player.play();
-    isPlaying = true;
     updateState();
   }
 
   @override
   void onStop() async {
-    if (!isPlaying) return;
+    if (!isPlaying()) return;
 
     await player.stop();
-    isPlaying = false;
     updateState();
-  }
-
-  void onPlaybackComplete() {
-    // Stop player
-    onStop();
-
-    // Repeat media
-    if (repeatMode == AudioPlayerRepeat.Single) {
-      playMedia(curIndex);
-    } else if (repeatMode == AudioPlayerRepeat.All ||
-        curIndex < queue.length - 1) {
-      skipIndex(1);
-    }
   }
 
   @override
   void onPause() async {
-    if (!isPlaying) return;
+    if (!isPlaying()) return;
 
     await player.pause();
-    isPlaying = false;
     updateState();
   }
 
   @override
   void onSkipToNext() {
+    if (!queueMode || queue == null) return;
     skipIndex(1);
   }
 
   @override
   void onSkipToPrevious() {
+    if (!queueMode || queue == null) return;
     skipIndex(-1);
   }
 
   @override
   void onPlayMediaItem(MediaItem media) async {
-    String url = media.extras['url'];
-    if (url == null) return;
+    if (isConnecting()) return;
 
-    if (isPlaying) {
-      onStop();
-    }
-
-    var duration = await player.setUrl(url);
-    var newMedia = media.copyWith(duration: duration?.inSeconds ?? 0);
-
-    AudioServiceBackground.setMediaItem(newMedia);
-    onPlay();
+    queueMode = false;
+    playMediaItem(media);
   }
 
   @override
   Future<void> onReplaceQueue(List<MediaItem> items) async {
-    queue = items;
+    if (queue != items) {
+      queue = items;
+    }
   }
 
   @override
   void onPlayFromMediaId(String mediaId) {
     try {
       var id = int.tryParse(mediaId, radix: 10);
-      playMedia(id);
+      playMediaId(id);
     } catch (error) {}
   }
 
@@ -169,9 +147,47 @@ class AudioPlayerTask extends BackgroundAudioTask {
     }
   }
 
-  void playMedia(int id) {
+  void onPlaybackComplete() {
+    if (!queueMode || queue == null) return;
+
+    // Repeat media
+    if (repeatMode == AudioPlayerRepeat.Single) {
+      playMediaId(curIndex);
+    } else if (repeatMode == AudioPlayerRepeat.All ||
+        curIndex < queue.length - 1) {
+      skipIndex(1);
+    }
+  }
+
+  void playMediaItem(MediaItem media) async {
+    if (isConnecting()) return;
+
+    String url = media.extras['url'];
+    if (url == null) return;
+
+    if (isPlaying()) {
+      onStop();
+    }
+
+    // Notify media change
+    AudioServiceBackground.setMediaItem(media);
+
+    var duration = await player.setUrl(url);
+
+    // Update duration
+    AudioServiceBackground.setMediaItem(
+      media.copyWith(duration: duration?.inMilliseconds ?? 0),
+    );
+
+    onPlay();
+  }
+
+  void playMediaId(int id) {
+    if (isConnecting()) return;
+
     curIndex = (id < 0 ? 0 : (id >= queue.length ? queue.length - 1 : id));
-    onPlayMediaItem(queue[curIndex]);
+    queueMode = true;
+    playMediaItem(queue[curIndex]);
   }
 
   void skipIndex(int rel) {
@@ -181,7 +197,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
     } else if (newIndex >= queue.length) {
       newIndex = 0;
     }
-    playMedia(newIndex);
+    playMediaId(newIndex);
   }
 
   void setRepeatMode(AudioPlayerRepeat mode) {
@@ -189,27 +205,55 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   MediaControl getPlayPauseControl() {
-    return isPlaying ? pauseControl : playControl;
+    return isPlaying() ? pauseControl : playControl;
   }
 
   List<MediaControl> getControls() {
     return [
       skipToPreviousControl,
       getPlayPauseControl(),
+      stopControl,
       skipToNextControl,
     ];
   }
 
+  bool isPlaying() => player.playbackState == AudioPlaybackState.playing;
+
+  bool isWaiting() =>
+      player.playbackState == AudioPlaybackState.none ||
+      player.playbackState == AudioPlaybackState.connecting;
+
+  bool isConnecting() => player.playbackState == AudioPlaybackState.connecting;
+
   void updateState({int position}) {
     // Playback position
-    final pbPos = player.playbackEvent.position?.inSeconds;
+    final pbPos = player.playbackEvent.position?.inMilliseconds;
 
     // Set state
     AudioServiceBackground.setState(
       controls: getControls(),
-      basicState:
-          isPlaying ? BasicPlaybackState.playing : BasicPlaybackState.paused,
+      basicState: toBasicState(),
       position: position == null ? pbPos : position,
     );
+  }
+
+  BasicPlaybackState toBasicState() {
+    // Convert audio state to service state
+    switch (player.playbackState) {
+      case AudioPlaybackState.completed:
+        return BasicPlaybackState.stopped;
+      case AudioPlaybackState.connecting:
+        return BasicPlaybackState.connecting;
+      case AudioPlaybackState.none:
+        return BasicPlaybackState.none;
+      case AudioPlaybackState.paused:
+        return BasicPlaybackState.paused;
+      case AudioPlaybackState.playing:
+        return BasicPlaybackState.playing;
+      case AudioPlaybackState.stopped:
+        return BasicPlaybackState.stopped;
+      default:
+        return BasicPlaybackState.none;
+    }
   }
 }
