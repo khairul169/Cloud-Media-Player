@@ -35,7 +35,7 @@ class Media {
   MediaItem toMediaItem({String key, String albumName}) => MediaItem(
       id: key,
       title: Utils.isEmpty(title) ? 'Playing...' : title,
-      album: albumName ?? album,
+      album: albumName ?? album ?? '',
       artist: Utils.isEmpty(artist) ? 'Unknown' : artist,
       artUri: image,
       extras: {'url': url, 'local': local});

@@ -147,6 +147,27 @@ class AudioPlayerTask extends BackgroundAudioTask {
     }
   }
 
+  @override
+  void onAudioFocusGained() {
+    player.setVolume(1.0);
+    //if (isPaused()) onPlay();
+  }
+
+  @override
+  void onAudioFocusLost() {
+    onPause();
+  }
+
+  @override
+  void onAudioFocusLostTransient() {
+    onPause();
+  }
+
+  @override
+  void onAudioFocusLostTransientCanDuck() {
+    player.setVolume(0.5);
+  }
+
   void onPlaybackComplete() {
     if (!queueMode || queue == null) return;
 
@@ -172,14 +193,18 @@ class AudioPlayerTask extends BackgroundAudioTask {
     // Notify media change
     AudioServiceBackground.setMediaItem(media);
 
-    var duration = await player.setUrl(url);
+    try {
+      var duration = await player.setUrl(url);
 
-    // Update duration
-    AudioServiceBackground.setMediaItem(
-      media.copyWith(duration: duration?.inMilliseconds ?? 0),
-    );
+      // Update duration
+      AudioServiceBackground.setMediaItem(
+        media.copyWith(duration: duration?.inMilliseconds ?? 0),
+      );
 
-    onPlay();
+      onPlay();
+    } catch (error) {
+      print(error);
+    }
   }
 
   void playMediaId(int id) {
@@ -218,6 +243,8 @@ class AudioPlayerTask extends BackgroundAudioTask {
   }
 
   bool isPlaying() => player.playbackState == AudioPlaybackState.playing;
+
+  bool isPaused() => player.playbackState == AudioPlaybackState.paused;
 
   bool isWaiting() =>
       player.playbackState == AudioPlaybackState.none ||
