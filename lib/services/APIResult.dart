@@ -2,13 +2,13 @@ import 'package:cmp/public/Utils.dart';
 
 enum ResultStatus { Success, Error }
 
-class ApiResult {
+class APIResult {
   final bool isError;
   final ResultStatus status;
   final dynamic data;
   final String message;
 
-  ApiResult({
+  APIResult({
     this.isError,
     this.status,
     this.data,
@@ -22,7 +22,7 @@ class ApiResult {
         ? json['message']
         : 'Error unexpected';
 
-    return ApiResult(
+    return APIResult(
       isError: isError,
       status: isError ? ResultStatus.Success : ResultStatus.Error,
       data: data,

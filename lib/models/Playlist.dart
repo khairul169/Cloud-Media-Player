@@ -4,13 +4,15 @@ import 'package:cmp/models/Media.dart';
 class Playlist {
   final List<Media> items;
 
-  Playlist(this.items);
+  Playlist({this.items});
 
-  factory Playlist.fromMedia(Media item) => Playlist([item]);
+  factory Playlist.fromMedia(Media item) => Playlist(items: [item]);
+
+  factory Playlist.fromMediaList(MediaList list) => Playlist(items: list.items);
 
   factory Playlist.fromJson(dynamic json) {
     var itemList = List.from(json).map((item) => Media.fromJson(item)).toList();
-    return Playlist(itemList);
+    return Playlist(items: itemList);
   }
 
   addMedia(Media item) {

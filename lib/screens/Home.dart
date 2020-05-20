@@ -1,9 +1,11 @@
+import 'package:async_redux/async_redux.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:cmp/actions/MediaList.dart';
 import 'package:cmp/models/Media.dart';
 import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/screens/Upload.dart';
-import 'package:cmp/services/ApiHelper.dart';
-import 'package:cmp/services/AudioPlayerTask.dart';
+import 'package:cmp/services/AppState.dart';
+import 'package:cmp/services/PlayerService.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -12,59 +14,25 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String test;
-  Playlist mediaList;
-  ScaffoldState scaffold;
-
   @override
   void initState() {
     super.initState();
-    fetchData();
-    setRepeatMode(AudioPlayerRepeat.All);
+    PlayerService.setRepeatMode(PlayerRepeat.All);
   }
 
-  void fetchData() async {
-    var result = await ApiHelper.get('media');
-    if (result.isError) {
-      scaffold.showSnackBar(SnackBar(content: Text(result.message)));
-      return;
-    }
-
-    try {
-      var itemList = Playlist.fromJson(result.data);
-      setState(() {
-        mediaList = itemList;
-      });
-    } catch (error) {
-      scaffold.showSnackBar(SnackBar(content: Text('Failed parsing data.')));
-    }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    StoreProvider.dispatch<AppState>(context, FetchMediaList());
   }
 
   void onStartMedia(int id) {
-    var test = Media(
-      url: 'http://192.168.43.48:3000/get/u5v7_Hzuz7Q',
-      image: 'http://i.ytimg.com/vi/u5v7_Hzuz7Q/hqdefault.jpg',
-    );
-
-    AudioService.playMediaItem(test.toMediaItem());
-    return;
-
     // Play media
-    var queue = mediaList.toQueue();
-    AudioService.replaceQueue(queue);
-    AudioService.playFromMediaId(id.toString());
-  }
+    var state = StoreProvider.state<AppState>(context);
+    if (state.mediaList.items == null) return;
 
-  void onPlay() {
-    AudioService.play();
-  }
-
-  void onStop() {
-    AudioService.pause();
-  }
-
-  void setRepeatMode(AudioPlayerRepeat mode) {
-    AudioService.customAction('setRepeatMode', mode.index);
+    var playList = Playlist.fromMediaList(state.mediaList);
+    PlayerService.setPlayList(playList, playId: id);
   }
 
   void onAddPress() {
@@ -73,15 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
     ));
   }
 
-  Widget buildMediaList() {
+  Widget buildMediaList(MediaList mediaList) {
+    if (mediaList.items == null) return Container();
     return ListView.builder(
       itemCount: mediaList.items.length,
-      itemBuilder: buildMediaItem,
+      itemBuilder: (_, index) {
+        var item = mediaList.items[index];
+        return buildMediaItem(index, item);
+      },
     );
   }
 
-  Widget buildMediaItem(_, index) {
-    var media = mediaList.items[index];
+  Widget buildMediaItem(int index, Media item) {
     return Card(
       child: InkWell(
         onTap: () => onStartMedia(index),
@@ -95,7 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   width: 64,
                   height: 64,
                   child: Image.network(
-                    media.image,
+                    item.image,
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -107,8 +78,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Text(media.title),
-                    Text(media.artist),
+                    Text(item.title),
+                    Text(item.artist),
                   ],
                 ),
               ),
@@ -149,18 +120,20 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text('Cloud Media Player'),
       ),
-      body: Builder(builder: (context) {
-        scaffold = Scaffold.of(context);
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Expanded(
-              child: mediaList != null ? buildMediaList() : Text('Loading...'),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Expanded(
+            child: StoreConnector<AppState, MediaList>(
+              converter: (store) => store.state.mediaList,
+              builder: (_, mediaList) => mediaList == null
+                  ? Text('Loading...')
+                  : buildMediaList(mediaList),
             ),
-            buildPlaybackPanel(),
-          ],
-        );
-      }),
+          ),
+          buildPlaybackPanel(),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.add),
         onPressed: onAddPress,

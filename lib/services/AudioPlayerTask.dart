@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
+import 'package:cmp/services/PlayerService.dart';
 import 'package:just_audio/just_audio.dart';
-
-enum AudioPlayerRepeat { None, Single, All }
 
 void audioTaskEntry() {
   AudioServiceBackground.run(() => AudioPlayerTask());
@@ -44,7 +43,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
 
   List<MediaItem> queue;
   int curIndex = -1;
-  AudioPlayerRepeat repeatMode = AudioPlayerRepeat.None;
+  PlayerRepeat repeatMode = PlayerRepeat.None;
   bool queueMode = false;
 
   static startService() {
@@ -138,9 +137,7 @@ class AudioPlayerTask extends BackgroundAudioTask {
   Future onCustomAction(String name, arguments) async {
     switch (name) {
       case 'setRepeatMode':
-        var mode = AudioPlayerRepeat.values
-            .firstWhere((value) => value.index == arguments);
-        setRepeatMode(mode);
+        setRepeatMode(arguments);
         break;
       default:
         break;
@@ -172,10 +169,9 @@ class AudioPlayerTask extends BackgroundAudioTask {
     if (!queueMode || queue == null) return;
 
     // Repeat media
-    if (repeatMode == AudioPlayerRepeat.Single) {
+    if (repeatMode == PlayerRepeat.Single) {
       playMediaId(curIndex);
-    } else if (repeatMode == AudioPlayerRepeat.All ||
-        curIndex < queue.length - 1) {
+    } else if (repeatMode == PlayerRepeat.All || curIndex < queue.length - 1) {
       skipIndex(1);
     }
   }
@@ -225,8 +221,10 @@ class AudioPlayerTask extends BackgroundAudioTask {
     playMediaId(newIndex);
   }
 
-  void setRepeatMode(AudioPlayerRepeat mode) {
-    repeatMode = mode;
+  void setRepeatMode(int mode) {
+    repeatMode = PlayerRepeat.values.firstWhere(
+      (value) => value.index == mode,
+    );
   }
 
   MediaControl getPlayPauseControl() {

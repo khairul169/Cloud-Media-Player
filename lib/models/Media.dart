@@ -45,3 +45,14 @@ class Media {
     local = true;
   }
 }
+
+class MediaList {
+  final List<Media> items;
+
+  MediaList({this.items});
+
+  factory MediaList.fromJson(dynamic json) {
+    var itemList = List.from(json).map((item) => Media.fromJson(item)).toList();
+    return MediaList(items: itemList);
+  }
+}

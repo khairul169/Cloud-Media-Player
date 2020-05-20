@@ -1,14 +1,13 @@
 import 'dart:async';
 import 'dart:io';
-
-import 'package:cmp/models/ApiResult.dart';
+import 'package:cmp/services/APIResult.dart';
 import 'package:http/http.dart';
 
-class FileUploadRequest extends MultipartRequest {
+class FileUploader extends MultipartRequest {
   final Function(int bytes, int totalBytes) onProgress;
-  final Function(ApiResult) onComplete;
+  final Function(APIResult) onComplete;
 
-  FileUploadRequest(Uri uri, {this.onProgress, this.onComplete})
+  FileUploader(Uri uri, {this.onProgress, this.onComplete})
       : super('POST', uri);
 
   @override

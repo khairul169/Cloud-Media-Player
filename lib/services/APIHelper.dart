@@ -1,27 +1,27 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:cmp/services/FileUploadRequest.dart';
 import 'package:http/http.dart' as http;
-import 'package:cmp/models/ApiResult.dart';
+import 'package:cmp/services/FileUploader.dart';
+import 'package:cmp/services/APIResult.dart';
 
 const API_URL = 'http://192.168.43.48/cmp-api/';
 
 enum RequestMethod { Get, Post }
 
-class ApiHelper {
+class APIHelper {
   static getUrl(String url) {
     return API_URL + url;
   }
 
-  static Future<ApiResult> get(String url) {
+  static Future<APIResult> get(String url) {
     return request(RequestMethod.Get, API_URL + url);
   }
 
-  static Future<ApiResult> post(String url, dynamic data) {
+  static Future<APIResult> post(String url, dynamic data) {
     return request(RequestMethod.Post, API_URL + url, body: data);
   }
 
-  static Future<ApiResult> request(
+  static Future<APIResult> request(
     RequestMethod method,
     String url, {
     dynamic body,
@@ -46,10 +46,10 @@ class ApiHelper {
       }
 
       // Parse result
-      var result = ApiResult.parse(jsonDecode(response.body));
+      var result = APIResult.parse(jsonDecode(response.body));
       return result;
     } catch (ex) {
-      return ApiResult(
+      return APIResult(
         isError: true,
         message: 'Error unexpected',
       );
@@ -64,7 +64,7 @@ class ApiHelper {
     if (file == null) return null;
 
     final uri = Uri.parse(API_URL + url);
-    final request = new FileUploadRequest(uri, onProgress: onProgress);
+    final request = new FileUploader(uri, onProgress: onProgress);
     await request.addFile('media', file);
 
     // Send response

@@ -1,6 +1,5 @@
 import 'dart:io';
-
-import 'package:cmp/services/ApiHelper.dart';
+import 'package:cmp/services/APIHelper.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -11,10 +10,10 @@ class UploadScreen extends StatefulWidget {
 
 class _UploadScreenState extends State<UploadScreen> {
   void onSelectFile() async {
-    File file = await FilePicker.getFile(type: FileType.audio);
-    print(file);
+    var file = await FilePicker.getFile(type: FileType.audio);
+    if (file == null) return;
 
-    var result = await ApiHelper.uploadFile(
+    var result = await APIHelper.uploadFile(
       'media/upload',
       file,
       onProgress: (bytes, total) {
@@ -22,7 +21,7 @@ class _UploadScreenState extends State<UploadScreen> {
       },
     );
 
-    print(result.body);
+    print(result);
   }
 
   @override
