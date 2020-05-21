@@ -1,9 +1,7 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:audio_service/audio_service.dart';
+import 'package:cmp/screens/Main.dart';
 import 'package:cmp/services/AppState.dart';
-import 'package:cmp/services/AudioPlayerTask.dart';
 import 'package:flutter/material.dart';
-import 'package:cmp/screens/Home.dart';
 
 class App extends StatelessWidget {
   final Store reduxStore;
@@ -19,10 +17,7 @@ class App extends StatelessWidget {
       ),
       home: StoreProvider<AppState>(
         store: reduxStore,
-        child: AudioServiceWidget(child: Builder(builder: (context) {
-          AudioPlayerTask.startService();
-          return HomeScreen();
-        })),
+        child: MainScreen(),
       ),
       debugShowCheckedModeBanner: false,
     );

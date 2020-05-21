@@ -1,11 +1,11 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:audio_service/audio_service.dart';
 import 'package:cmp/actions/MediaList.dart';
 import 'package:cmp/models/Media.dart';
 import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/screens/Upload.dart';
 import 'package:cmp/services/AppState.dart';
-import 'package:cmp/services/PlayerService.dart';
+import 'package:cmp/services/MediaPlayer.dart';
+import 'package:cmp/services/MediaPlayerService.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -17,7 +17,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    PlayerService.setRepeatMode(PlayerRepeat.All);
   }
 
   @override
@@ -32,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (state.mediaList.items == null) return;
 
     var playList = Playlist.fromMediaList(state.mediaList);
-    PlayerService.setPlayList(playList, playId: id);
+    MediaPlayerService.setPlayList(playList, playId: id);
   }
 
   void onAddPress() {
@@ -90,27 +89,53 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  StreamBuilder<MediaItem> buildPlaybackPanel() {
-    return StreamBuilder<MediaItem>(
-      stream: AudioService.currentMediaItemStream,
-      builder: (context, media) => StreamBuilder<PlaybackState>(
-        stream: AudioService.playbackStateStream,
-        builder: (context, event) {
-          var title = media.data?.title ?? '-';
-          var duration = media.data?.duration ?? 0;
-          var position = event.data?.position ?? 0;
-          return Padding(
-            padding: EdgeInsets.all(16),
-            child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text('Title: $title'),
-                  Text('Position: $position'),
-                  Text('Duration: $duration'),
-                ]),
-          );
-        },
-      ),
+  Widget buildPlaybackPanel() {
+    return StreamBuilder<MediaPlayerState>(
+      stream: MediaPlayerService.stateStream,
+      builder: (context, snapshot) {
+        var state = snapshot.data;
+        if (state == null) return Container();
+
+        var title = state.media?.title ?? '-';
+        var duration = state.media?.duration ?? 0;
+        var position = state.position ?? 0;
+
+        return Padding(
+          padding: EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text('Title: $title'),
+                    Text('Position: $position'),
+                    Text('Duration: $duration'),
+                  ],
+                ),
+              ),
+              Expanded(
+                flex: 1,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    RaisedButton(
+                      child: Text('Play'),
+                      onPressed: () => MediaPlayerService.play(),
+                    ),
+                    RaisedButton(
+                      child: Text('Pause'),
+                      onPressed: () => MediaPlayerService.pause(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 

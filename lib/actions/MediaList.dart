@@ -9,6 +9,8 @@ class FetchMediaList extends ReduxAction<AppState> {
     try {
       // Fetch media list
       var result = await APIHelper.get('media');
+      if (result.isError) throw Exception(result.message);
+
       var itemList = MediaList.fromJson(result.data);
 
       // Update state
