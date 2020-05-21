@@ -34,12 +34,6 @@ class _HomeScreenState extends State<HomeScreen> {
     MediaPlayerService.setPlayList(playList, playId: id);
   }
 
-  void onAddPress() {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => UploadScreen(),
-    ));
-  }
-
   Widget buildMediaList(MediaList mediaList) {
     if (mediaList.items == null) return Container();
     return ListView.builder(
@@ -91,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget buildPlaybackPanel() {
     return StreamBuilder<MediaPlayerState>(
-      stream: MediaPlayerService.stateStream,
+      stream: MediaPlayerService.stateEvent,
       builder: (context, snapshot) {
         var state = snapshot.data;
         if (state == null) return Container();
@@ -115,23 +109,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
               ),
-              Expanded(
-                flex: 1,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    RaisedButton(
-                      child: Text('Play'),
-                      onPressed: () => MediaPlayerService.play(),
-                    ),
-                    RaisedButton(
-                      child: Text('Pause'),
-                      onPressed: () => MediaPlayerService.pause(),
-                    ),
-                  ],
-                ),
-              ),
+              RaisedButton(
+                child: Text(MediaPlayerService.isPlaying ? 'Pause' : 'Play'),
+                onPressed: () {
+                  if (MediaPlayerService.isPlaying)
+                    MediaPlayerService.pause();
+                  else
+                    MediaPlayerService.play();
+                },
+              )
             ],
           ),
         );
@@ -158,10 +144,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           buildPlaybackPanel(),
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: onAddPress,
       ),
     );
   }

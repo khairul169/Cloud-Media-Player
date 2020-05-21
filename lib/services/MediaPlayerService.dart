@@ -4,6 +4,7 @@ import 'package:cmp/models/Playlist.dart';
 import 'package:cmp/services/BackgroundAudioService.dart';
 import 'package:cmp/services/MediaPlayer.dart';
 import 'package:flutter/foundation.dart';
+import 'package:rxdart/rxdart.dart';
 
 class MediaPlayerService {
   static MediaPlayer _player;
@@ -19,28 +20,47 @@ class MediaPlayerService {
   }
 
   static void play() {
-    return _player != null ? _player.play() : AudioService.play();
+    return (_player != null) ? _player.play() : AudioService.play();
   }
 
   static void pause() {
-    return _player != null ? _player.pause() : AudioService.pause();
+    return (_player != null) ? _player.pause() : AudioService.pause();
   }
 
   static void stop() {
-    return _player != null ? _player.stop() : AudioService.stop();
+    return (_player != null) ? _player.stop() : AudioService.stop();
   }
 
   static void next() {
-    return _player != null ? _player.skipToNext() : AudioService.skipToNext();
+    return (_player != null) ? _player.skipToNext() : AudioService.skipToNext();
   }
 
   static void prev() {
-    return _player != null
+    return (_player != null)
         ? _player.skipToPrevious()
         : AudioService.skipToPrevious();
   }
 
-  static Stream<MediaPlayerState> get stateStream => _player.stateEvent.stream;
+  static Stream<MediaPlayerState> get stateEvent {
+    if (_player != null) return _player.stateEvent;
+
+    // Combine audio service streams
+    return CombineLatestStream.combine2(
+      AudioService.currentMediaItemStream,
+      AudioService.playbackStateStream,
+      (MediaItem media, PlaybackState playback) => MediaPlayerState(
+        media: media,
+        state: BackgroundAudioService.getAudioState(playback.basicState),
+        position: playback.position,
+      ),
+    );
+  }
+
+  static bool get isPlaying {
+    return (_player != null)
+        ? _player.isPlaying
+        : AudioService.playbackState.basicState == BasicPlaybackState.playing;
+  }
 
   static void playMedia(Media media) {
     if (_player != null) {

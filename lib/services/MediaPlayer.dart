@@ -34,11 +34,13 @@ class MediaPlayer {
   int curIndex = -1;
   AudioRepeatMode repeatMode = AudioRepeatMode.None;
   bool queueMode = false;
-  StreamController<MediaPlayerState> stateEvent;
+  StreamController<MediaPlayerState> _stateController;
+  Stream<MediaPlayerState> stateEvent;
 
   MediaPlayer() {
     _state = MediaPlayerState();
-    stateEvent = StreamController();
+    _stateController = StreamController.broadcast();
+    stateEvent = _stateController.stream;
   }
 
   Function init() {
@@ -48,13 +50,14 @@ class MediaPlayer {
         .listen((state) => onPlaybackComplete());
 
     // Position change
-    var positionListener = player.getPositionStream().listen((data) {
+    var positionListener =
+        player.getPositionStream(Duration(milliseconds: 1000)).listen((data) {
       var position = data?.inMilliseconds ?? 0;
       _setState(position: position);
     });
 
     return () {
-      stateEvent.close();
+      _stateController.close();
       playCompleteListener.cancel();
       positionListener.cancel();
     };
@@ -179,7 +182,7 @@ class MediaPlayer {
       media: media ?? iMedia,
     );
 
-    stateEvent.add(_state);
+    _stateController.add(_state);
   }
 
   MediaPlayerState get state => _state;

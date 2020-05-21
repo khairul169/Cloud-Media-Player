@@ -57,7 +57,7 @@ class BackgroundAudioService extends BackgroundAudioTask {
   @override
   Future<void> onStart() async {
     var cleanListener = player.init();
-    player.stateEvent.stream.listen(onStateChange);
+    player.stateEvent.listen(onStateChange);
     await completer.future;
     cleanListener();
   }
@@ -193,6 +193,25 @@ class BackgroundAudioService extends BackgroundAudioTask {
         return BasicPlaybackState.stopped;
       default:
         return BasicPlaybackState.none;
+    }
+  }
+
+  static AudioPlaybackState getAudioState(BasicPlaybackState state) {
+    switch (state) {
+      case BasicPlaybackState.stopped:
+        return AudioPlaybackState.completed;
+      case BasicPlaybackState.connecting:
+        return AudioPlaybackState.connecting;
+      case BasicPlaybackState.none:
+        return AudioPlaybackState.none;
+      case BasicPlaybackState.paused:
+        return AudioPlaybackState.paused;
+      case BasicPlaybackState.playing:
+        return AudioPlaybackState.playing;
+      case BasicPlaybackState.stopped:
+        return AudioPlaybackState.stopped;
+      default:
+        return AudioPlaybackState.none;
     }
   }
 }
