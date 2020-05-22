@@ -1,12 +1,12 @@
 import 'package:audio_service/audio_service.dart';
 import 'package:cmp/models/Media.dart';
 import 'package:cmp/models/Playlist.dart';
-import 'package:cmp/services/BackgroundAudioService.dart';
+import 'package:cmp/services/MediaBackground.dart';
 import 'package:cmp/services/MediaPlayer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
-class MediaPlayerService {
+class MediaService {
   static MediaPlayer _player;
   static Function _disposeFn;
 
@@ -15,7 +15,7 @@ class MediaPlayerService {
       _player = MediaPlayer();
       _disposeFn = _player.init();
     } else {
-      await BackgroundAudioService.start();
+      await MediaBackground.start();
     }
   }
 
@@ -50,7 +50,7 @@ class MediaPlayerService {
       AudioService.playbackStateStream,
       (MediaItem media, PlaybackState playback) => MediaPlayerState(
         media: media,
-        state: BackgroundAudioService.getAudioState(playback.basicState),
+        state: MediaBackground.getAudioState(playback.basicState),
         position: playback.position,
       ),
     );
@@ -78,14 +78,19 @@ class MediaPlayerService {
     }
   }
 
-  static void setPlayList(Playlist playlist, {int playId}) {
+  static void setPlaylist(Playlist playlist) {
     var queue = playlist.toQueue();
     if (_player != null) {
       _player.setQueue(queue);
     } else {
       AudioService.replaceQueue(queue);
     }
-    playIndex(playId ?? 0);
+  }
+
+  static Playlist get playlist {
+    var queue = (_player != null) ? _player.queue : AudioService.queue;
+    var items = List.from(queue).map((e) => Media.fromMediaItem(e)).toList();
+    return Playlist(items: items);
   }
 
   static void setRepeatMode(AudioRepeatMode mode) {

@@ -1,11 +1,10 @@
 import 'package:async_redux/async_redux.dart';
 import 'package:cmp/actions/MediaList.dart';
+import 'package:cmp/actions/PlayerState.dart';
 import 'package:cmp/models/Media.dart';
 import 'package:cmp/models/Playlist.dart';
-import 'package:cmp/screens/Upload.dart';
-import 'package:cmp/services/AppState.dart';
-import 'package:cmp/services/MediaPlayer.dart';
-import 'package:cmp/services/MediaPlayerService.dart';
+import 'package:cmp/states/AppState.dart';
+import 'package:cmp/widgets/PlaybackPanel.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,23 +14,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    StoreProvider.dispatch<AppState>(context, FetchMediaList());
+
+    // Fetch media list
+    StoreProvider.dispatch(context, FetchMediaList());
   }
 
   void onStartMedia(int id) {
     // Play media
-    var state = StoreProvider.state<AppState>(context);
-    if (state.mediaList.items == null) return;
-
-    var playList = Playlist.fromMediaList(state.mediaList);
-    MediaPlayerService.setPlayList(playList, playId: id);
+    var mediaList = StoreProvider.state<AppState>(context).mediaList;
+    var playlist = Playlist.fromMediaList(mediaList);
+    StoreProvider.dispatch(context, SetPlaylist(playlist, playId: id));
   }
 
   Widget buildMediaList(MediaList mediaList) {
@@ -83,48 +77,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget buildPlaybackPanel() {
-    return StreamBuilder<MediaPlayerState>(
-      stream: MediaPlayerService.stateEvent,
-      builder: (context, snapshot) {
-        var state = snapshot.data;
-        if (state == null) return Container();
-
-        var title = state.media?.title ?? '-';
-        var duration = state.media?.duration ?? 0;
-        var position = state.position ?? 0;
-
-        return Padding(
-          padding: EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text('Title: $title'),
-                    Text('Position: $position'),
-                    Text('Duration: $duration'),
-                  ],
-                ),
-              ),
-              RaisedButton(
-                child: Text(MediaPlayerService.isPlaying ? 'Pause' : 'Play'),
-                onPressed: () {
-                  if (MediaPlayerService.isPlaying)
-                    MediaPlayerService.pause();
-                  else
-                    MediaPlayerService.play();
-                },
-              )
-            ],
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -142,7 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : buildMediaList(mediaList),
             ),
           ),
-          buildPlaybackPanel(),
+          PlaybackPanel(),
         ],
       ),
     );

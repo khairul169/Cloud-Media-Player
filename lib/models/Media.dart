@@ -32,6 +32,14 @@ class Media {
       image: json['image'],
       url: json['url']);
 
+  factory Media.fromMediaItem(MediaItem media) => Media(
+      title: media.title,
+      album: media.album,
+      artist: media.artist,
+      image: media.artUri,
+      url: media.extras['url'],
+      local: media.extras['local']);
+
   MediaItem toMediaItem({String key, String albumName}) => MediaItem(
       id: key,
       title: Utils.isEmpty(title) ? 'Playing...' : title,

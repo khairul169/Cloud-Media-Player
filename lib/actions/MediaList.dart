@@ -1,7 +1,7 @@
 import 'package:async_redux/async_redux.dart';
 import 'package:cmp/models/Media.dart';
 import 'package:cmp/services/APIHelper.dart';
-import 'package:cmp/services/AppState.dart';
+import 'package:cmp/states/AppState.dart';
 
 class FetchMediaList extends ReduxAction<AppState> {
   @override

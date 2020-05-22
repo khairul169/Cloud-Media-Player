@@ -34,10 +34,10 @@ MediaControl stopControl = MediaControl(
 );
 
 void audioTaskEntry() {
-  AudioServiceBackground.run(() => BackgroundAudioService());
+  AudioServiceBackground.run(() => MediaBackground());
 }
 
-class BackgroundAudioService extends BackgroundAudioTask {
+class MediaBackground extends BackgroundAudioTask {
   final completer = Completer();
   final player = MediaPlayer();
 

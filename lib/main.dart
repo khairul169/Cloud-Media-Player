@@ -1,6 +1,6 @@
 import 'package:async_redux/async_redux.dart';
 import 'package:cmp/screens/Main.dart';
-import 'package:cmp/services/AppState.dart';
+import 'package:cmp/states/AppState.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {

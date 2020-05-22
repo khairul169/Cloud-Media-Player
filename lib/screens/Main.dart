@@ -1,7 +1,8 @@
+import 'package:async_redux/async_redux.dart';
 import 'package:audio_service/audio_service.dart';
+import 'package:cmp/actions/PlayerState.dart';
 import 'package:cmp/screens/Home.dart';
-import 'package:cmp/services/MediaPlayer.dart';
-import 'package:cmp/services/MediaPlayerService.dart';
+import 'package:cmp/services/MediaService.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -12,19 +13,20 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   @override
-  void initState() {
-    super.initState();
-    MediaPlayerService.init();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    initAudioPlayer();
   }
 
   void initAudioPlayer() async {
-    await MediaPlayerService.init();
-    MediaPlayerService.setRepeatMode(AudioRepeatMode.All);
+    // Initialize media player service
+    await MediaService.init();
+    StoreProvider.dispatch(context, OnPlayerInit());
   }
 
   @override
   void dispose() {
-    MediaPlayerService.dispose();
+    MediaService.dispose();
     super.dispose();
   }
 

@@ -51,7 +51,7 @@ class MediaPlayer {
 
     // Position change
     var positionListener =
-        player.getPositionStream(Duration(milliseconds: 1000)).listen((data) {
+        player.getPositionStream(Duration(milliseconds: 500)).listen((data) {
       var position = data?.inMilliseconds ?? 0;
       _setState(position: position);
     });
@@ -155,7 +155,8 @@ class MediaPlayer {
   void setVolume(double volume) => player.setVolume(volume);
 
   void onPlaybackComplete() {
-    if (!queueMode || queue == null) return;
+    if (!queueMode || queue == null || repeatMode == AudioRepeatMode.None)
+      return;
 
     // Repeat media
     if (repeatMode == AudioRepeatMode.Single) {
