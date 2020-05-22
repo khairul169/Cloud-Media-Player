@@ -1,4 +1,4 @@
-import 'package:cmp/public/Utils.dart';
+import 'package:cmp/public/utils.dart';
 
 enum ResultStatus { Success, Error }
 

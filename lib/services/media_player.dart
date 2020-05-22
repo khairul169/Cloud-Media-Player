@@ -1,6 +1,5 @@
 import 'dart:async';
-
-import 'package:audio_service/audio_service.dart';
+import 'package:cmp/models/media_player_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -9,14 +8,14 @@ enum AudioRepeatMode { None, Single, All }
 class MediaPlayerState {
   AudioPlaybackState state;
   int position;
-  MediaItem media;
+  MediaPlayerItem media;
 
   MediaPlayerState({this.state, this.position, this.media});
 
   copyWith({
     AudioPlaybackState state,
     int position,
-    MediaItem media,
+    MediaPlayerItem media,
   }) {
     return MediaPlayerState(
       state: state ?? this.state,
@@ -30,7 +29,7 @@ class MediaPlayer {
   final player = AudioPlayer();
 
   MediaPlayerState _state;
-  List<MediaItem> queue;
+  List<MediaPlayerItem> queue;
   int curIndex = -1;
   AudioRepeatMode repeatMode = AudioRepeatMode.None;
   bool queueMode = false;
@@ -94,15 +93,15 @@ class MediaPlayer {
     skipIndex(-1);
   }
 
-  void setQueue(List<MediaItem> items) {
+  void setQueue(List<MediaPlayerItem> items) {
     if (queue != items) {
       queue = items;
     }
   }
 
-  Future<int> _playMedia(MediaItem media) async {
-    String url = media.extras['url'];
-    bool local = media.extras['local'] ?? false;
+  Future<int> _playMedia(MediaPlayerItem media) async {
+    String url = media.url;
+    bool local = media.local ?? false;
 
     if (url == null) return 0;
     if (isPlaying) stop();
@@ -126,7 +125,7 @@ class MediaPlayer {
     return duration.inMilliseconds;
   }
 
-  Future<int> playMediaItem(MediaItem media) async {
+  Future<int> playMediaItem(MediaPlayerItem media) async {
     if (isBusy) return 0;
 
     queueMode = false;
@@ -170,7 +169,7 @@ class MediaPlayer {
   void _setState({
     AudioPlaybackState state,
     int position,
-    MediaItem media,
+    MediaPlayerItem media,
   }) {
     // Playback position
     final iState = player.playbackState;

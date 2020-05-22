@@ -1,8 +1,8 @@
 import 'package:async_redux/async_redux.dart';
 import 'package:audio_service/audio_service.dart';
-import 'package:cmp/actions/PlayerState.dart';
-import 'package:cmp/screens/Home.dart';
-import 'package:cmp/services/MediaService.dart';
+import 'package:cmp/actions/playback.dart';
+import 'package:cmp/services/media_service.dart';
+import 'package:cmp/views/screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

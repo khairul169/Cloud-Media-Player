@@ -1,6 +1,6 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:cmp/screens/Main.dart';
-import 'package:cmp/states/AppState.dart';
+import 'package:cmp/states/app_state.dart';
+import 'package:cmp/views/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 
 class App extends StatelessWidget {
@@ -10,16 +10,16 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Cloud Music Player',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return StoreProvider<AppState>(
+      store: reduxStore,
+      child: MaterialApp(
+        title: 'Cloud Music Player',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MainScreen(),
+        debugShowCheckedModeBanner: false,
       ),
-      home: StoreProvider<AppState>(
-        store: reduxStore,
-        child: MainScreen(),
-      ),
-      debugShowCheckedModeBanner: false,
     );
   }
 }

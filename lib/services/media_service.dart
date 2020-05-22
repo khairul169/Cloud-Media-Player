@@ -1,8 +1,7 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:cmp/models/Media.dart';
-import 'package:cmp/models/Playlist.dart';
-import 'package:cmp/services/MediaBackground.dart';
-import 'package:cmp/services/MediaPlayer.dart';
+import 'package:cmp/models/media_player_item.dart';
+import 'package:cmp/services/media_background.dart';
+import 'package:cmp/services/media_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -49,7 +48,7 @@ class MediaService {
       AudioService.currentMediaItemStream,
       AudioService.playbackStateStream,
       (MediaItem media, PlaybackState playback) => MediaPlayerState(
-        media: media,
+        media: MediaPlayerItem.fromMediaItem(media),
         state: MediaBackground.getAudioState(playback.basicState),
         position: playback.position,
       ),
@@ -62,9 +61,9 @@ class MediaService {
         : AudioService.playbackState.basicState == BasicPlaybackState.playing;
   }
 
-  static void playMedia(Media media) {
+  static void playMedia(MediaPlayerItem media) {
     if (_player != null) {
-      _player.playMediaItem(media.toMediaItem());
+      _player.playMediaItem(media);
     } else {
       AudioService.playMediaItem(media.toMediaItem());
     }
@@ -78,19 +77,20 @@ class MediaService {
     }
   }
 
-  static void setPlaylist(Playlist playlist) {
-    var queue = playlist.toQueue();
+  static void setPlaylist(List<MediaPlayerItem> playlist) {
     if (_player != null) {
-      _player.setQueue(queue);
+      _player.setQueue(playlist);
     } else {
+      var queue = playlist.map((e) => e.toMediaItem()).toList();
       AudioService.replaceQueue(queue);
     }
   }
 
-  static Playlist get playlist {
-    var queue = (_player != null) ? _player.queue : AudioService.queue;
-    var items = List.from(queue).map((e) => Media.fromMediaItem(e)).toList();
-    return Playlist(items: items);
+  static List<MediaPlayerItem> get playlist {
+    if (_player != null) return _player.queue;
+    return AudioService.queue
+        .map((e) => MediaPlayerItem.fromMediaItem(e))
+        .toList();
   }
 
   static void setRepeatMode(AudioRepeatMode mode) {

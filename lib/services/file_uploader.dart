@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:io';
-import 'package:cmp/services/APIResult.dart';
+import 'package:cmp/models/api_result.dart';
 import 'package:http/http.dart';
 
 class FileUploader extends MultipartRequest {

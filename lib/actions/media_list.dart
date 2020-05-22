@@ -1,7 +1,7 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:cmp/models/Media.dart';
-import 'package:cmp/services/APIHelper.dart';
-import 'package:cmp/states/AppState.dart';
+import 'package:cmp/models/media.dart';
+import 'package:cmp/services/api_helper.dart';
+import 'package:cmp/states/app_state.dart';
 
 class FetchMediaList extends ReduxAction<AppState> {
   @override
@@ -11,7 +11,8 @@ class FetchMediaList extends ReduxAction<AppState> {
       var result = await APIHelper.get('media');
       if (result.isError) throw Exception(result.message);
 
-      var itemList = MediaList.fromJson(result.data);
+      var itemList =
+          List.from(result.data).map((e) => Media.fromJson(e)).toList();
 
       // Update state
       dispatch(SetMediaList(itemList));
@@ -25,7 +26,7 @@ class FetchMediaList extends ReduxAction<AppState> {
 }
 
 class SetMediaList extends ReduxAction<AppState> {
-  final MediaList items;
+  final List<Media> items;
 
   SetMediaList(this.items);
 

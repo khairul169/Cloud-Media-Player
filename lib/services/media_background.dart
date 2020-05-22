@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:audio_service/audio_service.dart';
-import 'package:cmp/services/MediaPlayer.dart';
+import 'package:cmp/models/media_player_item.dart';
+import 'package:cmp/services/media_player.dart';
 import 'package:just_audio/just_audio.dart';
 
 MediaControl playControl = MediaControl(
@@ -89,12 +90,13 @@ class MediaBackground extends BackgroundAudioTask {
 
   @override
   void onPlayMediaItem(MediaItem media) {
-    player.playMediaItem(media);
+    player.playMediaItem(MediaPlayerItem.fromMediaItem(media));
   }
 
   @override
   Future<void> onReplaceQueue(List<MediaItem> items) async {
-    player.setQueue(items);
+    var queue = items.map((e) => MediaPlayerItem.fromMediaItem(e)).toList();
+    player.setQueue(queue);
   }
 
   @override
@@ -166,13 +168,13 @@ class MediaBackground extends BackgroundAudioTask {
       position: state.position,
     );
 
-    final durationChange =
-        (_media != null && _media.duration != state.media.duration);
-
     // Update media item
-    if (_media != state.media || durationChange) {
-      AudioServiceBackground.setMediaItem(state.media);
-      _media = state.media;
+    if (state.media != null && !state.media.equals(_media)) {
+      var mediaItem = state.media.toMediaItem();
+      if (mediaItem != null) {
+        AudioServiceBackground.setMediaItem(mediaItem);
+        _media = mediaItem;
+      }
     }
   }
 

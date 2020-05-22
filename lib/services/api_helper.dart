@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:cmp/models/api_result.dart';
+import 'package:cmp/services/file_uploader.dart';
 import 'package:http/http.dart' as http;
-import 'package:cmp/services/FileUploader.dart';
-import 'package:cmp/services/APIResult.dart';
 
 const API_URL = 'http://192.168.43.48/cmp-api/';
 
