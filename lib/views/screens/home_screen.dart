@@ -1,9 +1,24 @@
+import 'package:async_redux/async_redux.dart';
+import 'package:cmp/actions/media_list.dart';
+import 'package:cmp/models/media.dart';
+import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
 import 'package:cmp/views/containers/playback_panel_view.dart';
-import 'package:cmp/views/presentation/circle_shape.dart';
+import 'package:cmp/views/presentation/browse_navigation.dart';
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void didChangeDependencies() {
+    StoreProvider.dispatch(context, FetchMediaList());
+    super.didChangeDependencies();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -42,57 +57,13 @@ class HomeScreen extends StatelessWidget {
       children: [
         Text('Browse', style: Theme.of(context).textTheme.headline1),
         SizedBox(height: 24),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            NavigationItem(title: 'LIBRARY', current: true),
-            NavigationItem(title: 'DISCOVERY'),
-          ],
-        ),
+        BrowseNavigation(),
         SizedBox(height: 24),
-        MediaListView(),
+        StoreConnector<AppState, List<Media>>(
+          converter: (store) => store.state.mediaList,
+          builder: (_, items) => MediaListView(items: items),
+        ),
       ],
-    );
-  }
-}
-
-class NavigationItem extends StatelessWidget {
-  final String title;
-  final bool current;
-
-  const NavigationItem({
-    Key key,
-    @required this.title,
-    this.current = false,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    var titleStyle = Theme.of(context).textTheme.subtitle2;
-    titleStyle = titleStyle.copyWith(
-      color: current ? titleStyle.color : titleStyle.color.withOpacity(0.6),
-    );
-    return Container(
-      margin: EdgeInsets.only(right: 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: titleStyle),
-          buildIndicator(context),
-        ],
-      ),
-    );
-  }
-
-  Widget buildIndicator(BuildContext context) {
-    if (!current) return Container();
-    return Container(
-      margin: EdgeInsets.only(top: 12),
-      child: CircleShape(
-        color: Theme.of(context).primaryColorLight.withOpacity(0.8),
-        size: 4,
-      ),
     );
   }
 }

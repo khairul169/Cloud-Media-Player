@@ -1,40 +1,29 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:cmp/actions/media_list.dart';
 import 'package:cmp/actions/playback.dart';
 import 'package:cmp/models/media.dart';
 import 'package:cmp/models/playlist.dart';
-import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/presentation/media_list.dart';
 import 'package:flutter/material.dart';
 
-class MediaListView extends StatefulWidget {
-  @override
-  _MediaListViewState createState() => _MediaListViewState();
-}
+class MediaListView extends StatelessWidget {
+  final List<Media> items;
 
-class _MediaListViewState extends State<MediaListView> {
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  MediaListView({this.items});
 
-    // Fetch media list
-    StoreProvider.dispatch(context, FetchMediaList());
-  }
-
-  void onStartMedia(int index) {
+  void onStartMedia(BuildContext context, int index) {
     // Play media
-    var mediaList = StoreProvider.state<AppState>(context).mediaList;
-    var playlist = Playlist(items: mediaList);
+    var playlist = Playlist(items: items);
     StoreProvider.dispatch(context, SetPlaylist(playlist, playId: index));
   }
 
   @override
   Widget build(BuildContext context) {
-    return StoreConnector<AppState, List<Media>>(
-      converter: (store) => store.state.mediaList,
-      builder: (_, mediaList) => mediaList == null
-          ? Text('Loading...')
-          : MediaList(items: mediaList, onItemPress: onStartMedia),
+    if (items == null) {
+      return Container();
+    }
+    return MediaList(
+      items: items,
+      onItemPress: (id) => onStartMedia(context, id),
     );
   }
 }
