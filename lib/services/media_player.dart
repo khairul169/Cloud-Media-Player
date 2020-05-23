@@ -114,13 +114,13 @@ class MediaPlayer {
         !local ? await player.setUrl(url) : await player.setFilePath(url);
 
     // Workaround for web build
-    if (kIsWeb) await Future.delayed(Duration(milliseconds: 500));
+    if (kIsWeb) await Future.delayed(Duration(milliseconds: 100));
 
     // Play media
     play();
 
     // Update media duration
-    _setState(media: media.copyWith(duration: duration.inMilliseconds));
+    _setState(media: media.copyWith(duration: duration?.inMilliseconds));
 
     return duration.inMilliseconds;
   }

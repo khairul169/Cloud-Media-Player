@@ -19,14 +19,31 @@ class PlaybackState {
     this.repeatMode = AudioRepeatMode.None,
   });
 
-  PlaybackState copyWith(MediaPlayerState state) {
+  PlaybackState copyWith({
+    MediaPlayerItem media,
+    bool playing,
+    bool paused,
+    int duration,
+    int position,
+    AudioRepeatMode repeatMode,
+  }) {
     return PlaybackState(
+      media: media ?? this.media,
+      playing: playing ?? this.playing,
+      paused: paused ?? this.paused,
+      duration: duration ?? this.duration,
+      position: position ?? this.position,
+      repeatMode: repeatMode ?? this.repeatMode,
+    );
+  }
+
+  PlaybackState copyMediaState(MediaPlayerState state) {
+    return copyWith(
       media: state.media != null ? state.media : null,
       playing: state.state == AudioPlaybackState.playing,
       paused: state.state == AudioPlaybackState.paused,
       duration: state.media?.duration ?? 0,
       position: state.position ?? 0,
-      repeatMode: repeatMode,
     );
   }
 }

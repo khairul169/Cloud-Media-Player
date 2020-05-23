@@ -3,12 +3,20 @@ import 'package:cmp/actions/playback.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:cmp/states/playback_state.dart';
 import 'package:cmp/views/presentation/playback_panel.dart';
+import 'package:cmp/views/screens/player_screen.dart';
 import 'package:flutter/material.dart';
 
 class PlaybackPanelView extends StatelessWidget {
   const PlaybackPanelView({
     Key key,
   }) : super(key: key);
+
+  void onPanelPressed(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => PlayerScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +25,13 @@ class PlaybackPanelView extends StatelessWidget {
       builder: (context, vm) {
         // State from store
         var state = vm.playback;
-        var title = state.media?.title ?? '';
 
         // Build widget
         return PlaybackPanel(
-          title: title,
+          media: state.media,
           playing: state.playing,
-          duration: state.duration,
-          position: state.position,
           onPlay: vm.onPlay,
-          onStop: vm.onStop,
+          onPress: () => onPanelPressed(context),
         );
       },
     );
@@ -38,12 +43,10 @@ class ViewModel extends BaseModel<AppState> {
 
   PlaybackState playback;
   Function onPlay;
-  Function onStop;
 
   ViewModel.build({
     this.playback,
     this.onPlay,
-    this.onStop,
   }) : super(equals: [playback]);
 
   @override
@@ -53,13 +56,11 @@ class ViewModel extends BaseModel<AppState> {
     return ViewModel.build(
       playback: state.playback,
       onPlay: () {
-        if (playing)
+        if (playing) {
           dispatch(SetPlaybackPause());
-        else
+        } else {
           dispatch(SetPlaybackPlay());
-      },
-      onStop: () {
-        dispatch(SetPlaybackStop());
+        }
       },
     );
   }

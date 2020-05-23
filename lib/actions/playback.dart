@@ -25,7 +25,7 @@ class PlayerStateChange extends ReduxAction<AppState> {
 
   @override
   AppState reduce() {
-    var playback = state.playback.copyWith(data);
+    var playback = state.playback.copyMediaState(data);
     return state.copyWith(playback: playback);
   }
 }
@@ -46,22 +46,48 @@ class SetPlaybackPause extends ReduxAction<AppState> {
   }
 }
 
-class SetPlaybackStop extends ReduxAction<AppState> {
+class SetPlaybackSkip extends ReduxAction<AppState> {
+  final bool prev;
+  SetPlaybackSkip({this.prev = false});
+
   @override
   AppState reduce() {
-    MediaService.stop();
+    if (prev) {
+      MediaService.prev();
+    } else {
+      MediaService.next();
+    }
     return null;
   }
 }
 
 class SetPlaybackRepeat extends ReduxAction<AppState> {
   final AudioRepeatMode mode;
-  SetPlaybackRepeat(this.mode);
+  SetPlaybackRepeat([this.mode]);
 
   @override
   AppState reduce() {
-    MediaService.setRepeatMode(mode);
-    return null;
+    var repeatMode = state.playback.repeatMode;
+
+    if (mode == null) {
+      switch (repeatMode) {
+        case AudioRepeatMode.None:
+          repeatMode = AudioRepeatMode.Single;
+          break;
+        case AudioRepeatMode.Single:
+          repeatMode = AudioRepeatMode.All;
+          break;
+        default:
+          repeatMode = AudioRepeatMode.None;
+          break;
+      }
+    } else {
+      repeatMode = mode;
+    }
+
+    MediaService.setRepeatMode(repeatMode);
+    var playback = state.playback.copyWith(repeatMode: repeatMode);
+    return state.copyWith(playback: playback);
   }
 }
 

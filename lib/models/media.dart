@@ -7,6 +7,7 @@ class Media {
   final String album;
   final int year;
   final String image;
+  final int duration;
   final String url;
   final bool local;
 
@@ -17,6 +18,7 @@ class Media {
     this.album,
     this.year,
     this.image,
+    this.duration,
     this.url,
     this.local = false,
   });
