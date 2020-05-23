@@ -14,14 +14,11 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   @override
   void didChangeDependencies() {
+    // Initialize media service
+    MediaService.init().then((_) {
+      StoreProvider.dispatch(context, OnPlayerInit());
+    });
     super.didChangeDependencies();
-    initAudioPlayer();
-  }
-
-  void initAudioPlayer() async {
-    // Initialize media player service
-    await MediaService.init();
-    StoreProvider.dispatch(context, OnPlayerInit());
   }
 
   @override
