@@ -39,10 +39,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: <Widget>[
           Expanded(
             child: SingleChildScrollView(
-              child: Container(
-                padding: EdgeInsets.all(16),
-                child: buildContent(context),
-              ),
+              child: buildContent(context),
             ),
           ),
           PlaybackPanelView(),
@@ -55,10 +52,17 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Browse', style: Theme.of(context).textTheme.headline1),
-        SizedBox(height: 24),
-        BrowseNavigation(),
-        SizedBox(height: 24),
+        Container(
+          padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Browse', style: Theme.of(context).textTheme.headline1),
+              SizedBox(height: 24),
+              BrowseNavigation(),
+            ],
+          ),
+        ),
         StoreConnector<AppState, List<Media>>(
           converter: (store) => store.state.mediaList,
           builder: (_, items) => MediaListView(items: items),

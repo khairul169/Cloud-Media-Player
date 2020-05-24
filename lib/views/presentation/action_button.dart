@@ -26,15 +26,40 @@ class ActionButton extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(size / 2.0),
         onTap: onPress,
-        child: Container(
-          width: size,
-          height: size,
-          child: Icon(
-            icon,
-            size: iconSize,
-            color: iconColor,
-          ),
+        child: ActionButtonIcon(
+          icon: icon,
+          iconSize: iconSize,
+          iconColor: iconColor,
+          size: size,
         ),
+      ),
+    );
+  }
+}
+
+class ActionButtonIcon extends StatelessWidget {
+  final IconData icon;
+  final double size;
+  final double iconSize;
+  final Color iconColor;
+
+  const ActionButtonIcon({
+    Key key,
+    @required this.icon,
+    this.size = 48,
+    this.iconSize = 20,
+    this.iconColor,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      child: Icon(
+        icon,
+        size: iconSize,
+        color: iconColor,
       ),
     );
   }

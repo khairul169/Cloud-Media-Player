@@ -9,7 +9,7 @@ class Media {
   final String image;
   final int duration;
   final String url;
-  final bool local;
+  final String localPath;
 
   Media({
     this.id,
@@ -20,7 +20,7 @@ class Media {
     this.image,
     this.duration,
     this.url,
-    this.local = false,
+    this.localPath,
   });
 
   factory Media.fromJson(dynamic json) => Media(
@@ -32,6 +32,8 @@ class Media {
       image: json['image'],
       url: json['url']);
 
+  bool get local => (localPath != null);
+
   Media withLocalPath(String path) => Media(
       id: id,
       title: title,
@@ -39,8 +41,8 @@ class Media {
       album: album,
       year: year,
       image: image,
-      url: path,
-      local: true);
+      url: url,
+      localPath: path);
 
   MediaPlayerItem toPlayerItem() => MediaPlayerItem(
       id: id,
@@ -49,6 +51,6 @@ class Media {
       album: album,
       image: image,
       duration: 0,
-      url: url,
-      local: local);
+      url: localPath ?? url,
+      local: localPath != null);
 }

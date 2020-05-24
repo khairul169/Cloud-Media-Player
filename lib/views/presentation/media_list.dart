@@ -5,11 +5,15 @@ import 'package:flutter/material.dart';
 class MediaList extends StatelessWidget {
   final List<Media> items;
   final Function(int index) onItemPress;
+  final Function(int index) onItemDownload;
+  final Function(int index) onItemDelete;
 
   const MediaList({
     Key key,
     @required this.items,
     @required this.onItemPress,
+    @required this.onItemDownload,
+    @required this.onItemDelete,
   }) : super(key: key);
 
   @override
@@ -22,9 +26,9 @@ class MediaList extends StatelessWidget {
         var item = items[index];
         return MediaListItem(
           item: item,
-          onPress: () {
-            onItemPress(index);
-          },
+          onPress: () => onItemPress(index),
+          onDownload: () => onItemDownload(index),
+          onDelete: () => onItemDelete(index),
         );
       },
     );

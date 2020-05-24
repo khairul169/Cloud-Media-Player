@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:cmp/models/media_player_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
@@ -109,9 +110,18 @@ class MediaPlayer {
     // Update state
     _setState(media: media);
 
+    print('Playing $url, local=$local');
+
     // Set url / path
-    var duration =
-        !local ? await player.setUrl(url) : await player.setFilePath(url);
+    Duration duration;
+    if (local) {
+      // Local file isn't exist
+      if (!await File(url).exists()) return 0;
+
+      duration = await player.setFilePath(url);
+    } else {
+      duration = await player.setUrl(url);
+    }
 
     // Workaround for web build
     if (kIsWeb) await Future.delayed(Duration(milliseconds: 100));
