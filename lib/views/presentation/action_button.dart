@@ -20,7 +20,8 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
+    return Material(
+      color: color ?? Colors.transparent,
       borderRadius: BorderRadius.circular(size / 2.0),
       child: InkWell(
         borderRadius: BorderRadius.circular(size / 2.0),
@@ -28,7 +29,6 @@ class ActionButton extends StatelessWidget {
         child: Container(
           width: size,
           height: size,
-          color: color,
           child: Icon(
             icon,
             size: iconSize,

@@ -1,5 +1,6 @@
 import 'package:cmp/models/media_player_item.dart';
 import 'package:cmp/public/utils.dart';
+import 'package:cmp/views/presentation/action_button.dart';
 import 'package:flutter/material.dart';
 
 class PlaybackPanel extends StatelessWidget {
@@ -32,7 +33,10 @@ class PlaybackPanel extends StatelessWidget {
           decoration: BoxDecoration(
             color: theme.backgroundColor,
             boxShadow: [
-              BoxShadow(blurRadius: 5, color: theme.primaryColorDark)
+              BoxShadow(
+                blurRadius: 10,
+                color: theme.primaryColorDark.withOpacity(0.6),
+              ),
             ],
           ),
           child: Row(
@@ -68,23 +72,11 @@ class PlaybackPanel extends StatelessWidget {
                 ),
               ),
               SizedBox(width: 16),
-              SizedBox(
-                width: 32,
-                height: 32,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border:
-                        Border.all(color: theme.primaryColorLight, width: 1),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: GestureDetector(
-                    child: Icon(
-                      playing ? Icons.pause : Icons.play_arrow,
-                      size: 18,
-                    ),
-                    onTap: onPlay,
-                  ),
-                ),
+              ActionButton(
+                icon: playing ? Icons.pause : Icons.play_arrow,
+                onPress: onPlay,
+                color: theme.primaryColor,
+                size: 40,
               ),
             ],
           ),
