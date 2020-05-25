@@ -5,6 +5,7 @@ import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
 import 'package:cmp/views/containers/playback_panel_view.dart';
 import 'package:cmp/views/presentation/navigation_bar.dart';
+import 'package:cmp/views/presentation/playlist_library.dart';
 import 'package:cmp/views/presentation/section_title.dart';
 import 'package:flutter/material.dart';
 
@@ -67,17 +68,23 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 16),
-              Text('Discover', style: Theme.of(context).textTheme.headline1),
+              Text(
+                'Browse',
+                style: Theme.of(context).textTheme.headline1,
+              ),
               SizedBox(height: 8),
               NavigationBar(
-                items: ['Your library', 'Popular'],
+                items: ['Library', 'Popular'],
                 onSelect: (id) {},
               ),
             ],
           ),
         ),
+        SectionTitle(title: 'Playlist'),
+        PlaylistLibrary(),
+        SizedBox(height: 24),
         SectionTitle(
-          title: 'Library',
+          title: 'Local Media',
           onMore: () {},
         ),
         StoreConnector<AppState, List<Media>>(
