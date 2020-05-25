@@ -29,10 +29,10 @@ class PlaybackPanel extends StatelessWidget {
       return Container();
     }
 
-    return Container(
-      height: 66,
-      color: theme.backgroundColor,
-      child: GestureDetector(
+    return GestureDetector(
+      child: Container(
+        height: 66,
+        color: theme.backgroundColor,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -43,13 +43,13 @@ class PlaybackPanel extends StatelessWidget {
             ),
           ],
         ),
-        onTap: onPress,
-        onPanUpdate: (details) {
-          if (details.delta.dy < 0 && onPress != null) {
-            onPress();
-          }
-        },
       ),
+      onTap: onPress,
+      onPanUpdate: (details) {
+        if (details.delta.dy < 0 && onPress != null) {
+          onPress();
+        }
+      },
     );
   }
 
