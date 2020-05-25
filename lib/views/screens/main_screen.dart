@@ -5,6 +5,7 @@ import 'package:cmp/services/media_service.dart';
 import 'package:cmp/views/screens/home_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class MainScreen extends StatefulWidget {
   @override
@@ -29,6 +30,10 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      statusBarColor: Theme.of(context).scaffoldBackgroundColor,
+    ));
+
     var home = HomeScreen();
     return !kIsWeb ? AudioServiceWidget(child: home) : home;
   }

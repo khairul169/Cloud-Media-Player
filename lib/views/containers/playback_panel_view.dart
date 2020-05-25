@@ -25,12 +25,17 @@ class PlaybackPanelView extends StatelessWidget {
       builder: (context, vm) {
         // State from store
         var state = vm.playback;
+        var progress = (state.duration != null && state.duration > 0.0)
+            ? state.position / state.duration
+            : null;
 
         // Build widget
         return PlaybackPanel(
           media: state.media,
           playing: state.playing,
+          progress: progress,
           onPlay: vm.onPlay,
+          onSkip: vm.onSkip,
           onPress: () => onPanelPressed(context),
         );
       },
@@ -43,10 +48,12 @@ class ViewModel extends BaseModel<AppState> {
 
   PlaybackState playback;
   Function onPlay;
+  Function onSkip;
 
   ViewModel.build({
     this.playback,
     this.onPlay,
+    this.onSkip,
   }) : super(equals: [playback]);
 
   @override
@@ -61,6 +68,9 @@ class ViewModel extends BaseModel<AppState> {
         } else {
           dispatch(SetPlaybackPlay());
         }
+      },
+      onSkip: () {
+        dispatch(SetPlaybackSkip());
       },
     );
   }

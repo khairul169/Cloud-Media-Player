@@ -29,8 +29,8 @@ class App extends StatelessWidget {
     var primaryLight = Color(0xffdddddd);
     var primaryDark = Color(0xff080808);
     var secondary = Colors.blue;
-    var bg = Color(0xff161616);
-    var scaffoldBg = bg;
+    var bg = Color(0xff202020);
+    var scaffoldBg = Color(0xff161616);
 
     return theme.copyWith(
       brightness: Brightness.dark,
@@ -41,7 +41,7 @@ class App extends StatelessWidget {
       backgroundColor: bg,
       scaffoldBackgroundColor: scaffoldBg,
       appBarTheme: AppBarTheme(
-        color: bg,
+        color: scaffoldBg,
         elevation: 0,
         textTheme: TextTheme(
           headline6: textTheme.headline6.copyWith(fontSize: 14),
@@ -52,6 +52,10 @@ class App extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
         elevation: 0,
         margin: EdgeInsets.all(0),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: bg,
+        elevation: 0,
       ),
       textTheme: textTheme.copyWith(
         headline1: textTheme.headline1.copyWith(

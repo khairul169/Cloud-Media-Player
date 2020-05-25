@@ -22,7 +22,7 @@ class MediaListItem extends StatelessWidget {
       onTap: onPress,
       onLongPress: onMenu,
       child: Container(
-        padding: EdgeInsets.only(top: 8, bottom: 8, left: 16),
+        padding: EdgeInsets.fromLTRB(16, 8, 4, 8),
         child: Row(
           children: <Widget>[
             Center(
@@ -45,8 +45,8 @@ class MediaListItem extends StatelessWidget {
             SizedBox(width: 16),
             buildIndicator(),
             ActionButton(
-              icon: Icons.more_vert,
-              onPress: onMenu,
+              icon: Icons.favorite_border,
+              onPress: () {},
             ),
           ],
         ),
@@ -83,8 +83,8 @@ class MediaListItem extends StatelessWidget {
     if (item.local) {
       return CircleShape(
         color: Colors.green,
-        child: Icon(Icons.file_download, size: 16),
-        size: 28,
+        child: Icon(Icons.file_download, size: 14),
+        size: 24,
       );
     }
     return Container();

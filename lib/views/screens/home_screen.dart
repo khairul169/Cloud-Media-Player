@@ -5,6 +5,7 @@ import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
 import 'package:cmp/views/containers/playback_panel_view.dart';
 import 'package:cmp/views/presentation/navigation_bar.dart';
+import 'package:cmp/views/presentation/section_title.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -75,6 +76,10 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+        SectionTitle(
+          title: 'Library',
+          onMore: () {},
+        ),
         StoreConnector<AppState, List<Media>>(
           converter: (store) {
             var playlists = store.state.userPlaylists;
@@ -90,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
+        SizedBox(height: 16),
       ],
     );
   }
