@@ -1,5 +1,5 @@
-import 'package:cmp/models/media_player_item.dart';
 import 'package:cmp/public/utils.dart';
+import 'package:cmp/services/media_player.dart';
 import 'package:cmp/views/presentation/action_button.dart';
 import 'package:flutter/material.dart';
 

@@ -1,5 +1,5 @@
 import 'package:cmp/models/media.dart';
-import 'package:cmp/models/media_player_item.dart';
+import 'package:cmp/services/media_player.dart';
 
 class Playlist {
   final List<Media> items;
@@ -15,5 +15,9 @@ class Playlist {
 
   List<MediaPlayerItem> toMediaQueue() {
     return items.map((e) => e.toPlayerItem()).toList();
+  }
+
+  Playlist copyWith({List<Media> items}) {
+    return Playlist(items: items ?? this.items);
   }
 }

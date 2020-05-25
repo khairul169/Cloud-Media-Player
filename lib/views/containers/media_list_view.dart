@@ -3,16 +3,16 @@ import 'package:cmp/actions/playback.dart';
 import 'package:cmp/models/media.dart';
 import 'package:cmp/models/playlist.dart';
 import 'package:cmp/services/offline_media_service.dart';
-import 'package:cmp/views/containers/media_list_builder.dart';
-import 'package:cmp/views/presentation/media_list.dart';
+import 'package:cmp/views/presentation/circle_progress.dart';
+import 'package:cmp/views/presentation/media_list_item.dart';
 import 'package:flutter/material.dart';
 
 class MediaListView extends StatelessWidget {
   final List<Media> items;
+  final Function(int index) onDelete;
+  final Function(int index) onUpdate;
 
-  MediaListView({this.items});
-
-  final _mediaBuilderKey = GlobalKey();
+  MediaListView({this.items, this.onDelete, this.onUpdate});
 
   void onStartMedia(BuildContext context, int index) {
     // Play media
@@ -20,7 +20,10 @@ class MediaListView extends StatelessWidget {
     StoreProvider.dispatch(context, SetPlaylist(playlist, playId: index));
   }
 
-  void onDownload(Media media) async {
+  Future<void> onDownload(int index) async {
+    var media = items[index];
+    await Future.delayed(Duration(milliseconds: 500));
+
     if (!media.local) {
       await OfflineMediaService.download(media);
     } else {
@@ -28,28 +31,70 @@ class MediaListView extends StatelessWidget {
     }
 
     // Update media list
-    var mediaBuilder = _mediaBuilderKey.currentWidget as MediaListBuilder;
-    if (mediaBuilder != null) mediaBuilder.rebuild(media);
-  }
-
-  Widget buildMediaList(BuildContext context, List<Media> mediaList) {
-    return MediaList(
-      items: mediaList,
-      onItemPress: (id) => onStartMedia(context, id),
-      onItemDownload: (id) => onDownload(items[id]),
-      onItemDelete: (id) {},
-    );
+    if (onUpdate != null) onUpdate(index);
   }
 
   @override
   Widget build(BuildContext context) {
     if (items == null) {
-      return Container();
+      return SizedBox(
+        height: 200,
+        child: Center(child: CircleProgress(size: 48)),
+      );
     }
-    return MediaListBuilder(
-      key: _mediaBuilderKey,
-      items: items,
-      builder: (list) => buildMediaList(context, list),
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: buildMediaListItem,
     );
+  }
+
+  Widget buildMediaListItem(BuildContext context, int index) {
+    return MediaListItem(
+      item: items[index],
+      onPress: () {
+        onStartMedia(context, index);
+      },
+      onMenu: () {
+        showItemMenu(context, index);
+      },
+    );
+  }
+
+  void showItemMenu(BuildContext context, int index) {
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => Wrap(children: getItemMenu(ctx, index)),
+    );
+  }
+
+  List<Widget> getItemMenu(BuildContext ctx, int index) {
+    Media item = items[index];
+    return [
+      ListTile(
+        leading: Icon(Icons.favorite_border),
+        title: Text('Mark Favorite'),
+        onTap: () {
+          Navigator.pop(ctx);
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.file_download),
+        title: Text(item.local ? 'Remove Downloaded' : 'Download Media'),
+        onTap: () {
+          onDownload(index);
+          Navigator.pop(ctx);
+        },
+      ),
+      ListTile(
+        leading: Icon(Icons.delete_outline),
+        title: Text('Delete'),
+        onTap: () {
+          if (onDelete != null) onDelete(index);
+          Navigator.pop(ctx);
+        },
+      ),
+    ];
   }
 }

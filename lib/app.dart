@@ -61,13 +61,9 @@ class App extends StatelessWidget {
           letterSpacing: 1,
         ),
         headline5: textTheme.headline5.copyWith(fontSize: 24),
-        subtitle1: textTheme.subtitle1.copyWith(
+        subtitle2: textTheme.subtitle2.copyWith(
           fontSize: 14,
           color: textTheme.subtitle1.color.withOpacity(0.6),
-        ),
-        subtitle2: textTheme.subtitle2.copyWith(
-          fontSize: 12,
-          letterSpacing: 1.5,
         ),
       ),
     );

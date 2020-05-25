@@ -1,5 +1,4 @@
 import 'package:audio_service/audio_service.dart';
-import 'package:cmp/models/media_player_item.dart';
 import 'package:cmp/services/media_background.dart';
 import 'package:cmp/services/media_player.dart';
 import 'package:flutter/foundation.dart';

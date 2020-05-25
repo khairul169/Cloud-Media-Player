@@ -1,25 +1,26 @@
 import 'package:cmp/models/media.dart';
 import 'package:cmp/public/utils.dart';
+import 'package:cmp/views/presentation/action_button.dart';
 import 'package:cmp/views/presentation/circle_shape.dart';
 import 'package:flutter/material.dart';
 
 class MediaListItem extends StatelessWidget {
   final Media item;
   final VoidCallback onPress;
-  final VoidCallback onDownload;
-  final VoidCallback onDelete;
+  final VoidCallback onMenu;
 
   const MediaListItem({
     Key key,
     this.item,
     this.onPress,
-    this.onDownload,
-    this.onDelete,
+    this.onMenu,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: onPress,
+      onLongPress: onMenu,
       child: Container(
         padding: EdgeInsets.only(top: 8, bottom: 8, left: 16),
         child: Row(
@@ -42,42 +43,14 @@ class MediaListItem extends StatelessWidget {
               child: buildDescription(),
             ),
             SizedBox(width: 16),
-            item.local
-                ? CircleShape(
-                    color: Colors.green,
-                    child: Icon(Icons.file_download, size: 16),
-                    size: 28,
-                  )
-                : Container(),
-            PopupMenuButton(
-              icon: Icon(Icons.more_vert, size: 20),
-              itemBuilder: (_) => [
-                PopupMenuItem(
-                  value: 0,
-                  child: Text(
-                    item.local ? 'Remove Download' : 'Download Media',
-                  ),
-                  textStyle: Theme.of(context).textTheme.bodyText1,
-                ),
-                PopupMenuItem(
-                  value: 1,
-                  child: Text('Delete'),
-                  textStyle: Theme.of(context).textTheme.bodyText1,
-                ),
-              ],
-              onSelected: (id) {
-                if (id == 0 && onDownload != null) {
-                  onDownload();
-                }
-                if (id == 1 && onDelete != null) {
-                  onDelete();
-                }
-              },
+            buildIndicator(),
+            ActionButton(
+              icon: Icons.more_vert,
+              onPress: onMenu,
             ),
           ],
         ),
       ),
-      onTap: onPress,
     );
   }
 
@@ -91,16 +64,29 @@ class MediaListItem extends StatelessWidget {
           overflow: TextOverflow.ellipsis,
           style: TextStyle(fontSize: 14),
         ),
-        !Utils.isEmpty(item.artist)
-            ? Container(
+        Utils.isEmpty(item.artist)
+            ? Container()
+            : Container(
                 margin: EdgeInsets.only(top: 4),
-                child: Text(
-                  item.artist,
-                  style: TextStyle(fontSize: 11),
-                ),
-              )
-            : Container(),
+                child: Text(item.artist, style: TextStyle(fontSize: 12)),
+              ),
       ],
     );
+  }
+
+  Widget buildIndicator() {
+    /*
+    return CircleProgress(
+      value: 0.8,
+    );
+    */
+    if (item.local) {
+      return CircleShape(
+        color: Colors.green,
+        child: Icon(Icons.file_download, size: 16),
+        size: 28,
+      );
+    }
+    return Container();
   }
 }

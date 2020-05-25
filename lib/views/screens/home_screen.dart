@@ -1,10 +1,10 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:cmp/actions/media_list.dart';
+import 'package:cmp/actions/user_playlist.dart';
 import 'package:cmp/models/media.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
 import 'package:cmp/views/containers/playback_panel_view.dart';
-import 'package:cmp/views/presentation/browse_navigation.dart';
+import 'package:cmp/views/presentation/navigation_bar.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -15,8 +15,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   void didChangeDependencies() {
-    StoreProvider.dispatch(context, FetchMediaList());
     super.didChangeDependencies();
+    onRefresh();
+  }
+
+  Future<void> onRefresh() async {
+    await StoreProvider.dispatchFuture(context, FetchUserPlaylist());
   }
 
   @override
@@ -38,8 +42,12 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Expanded(
-            child: SingleChildScrollView(
-              child: buildContent(context),
+            child: RefreshIndicator(
+              onRefresh: onRefresh,
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: buildContent(context),
+              ),
             ),
           ),
           PlaybackPanelView(),
@@ -53,19 +61,34 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.only(left: 16, right: 16, bottom: 24),
+          padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Browse', style: Theme.of(context).textTheme.headline1),
-              SizedBox(height: 24),
-              BrowseNavigation(),
+              SizedBox(height: 16),
+              Text('Discover', style: Theme.of(context).textTheme.headline1),
+              SizedBox(height: 8),
+              NavigationBar(
+                items: ['Your library', 'Popular'],
+                onSelect: (id) {},
+              ),
             ],
           ),
         ),
         StoreConnector<AppState, List<Media>>(
-          converter: (store) => store.state.mediaList,
-          builder: (_, items) => MediaListView(items: items),
+          converter: (store) {
+            var playlists = store.state.userPlaylists;
+            if (playlists != null && playlists.length > 0) {
+              return playlists[0].items;
+            }
+            return null;
+          },
+          builder: (_, mediaList) => MediaListView(
+            items: mediaList,
+            onUpdate: (id) {
+              onRefresh();
+            },
+          ),
         ),
       ],
     );

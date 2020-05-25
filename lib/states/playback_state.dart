@@ -1,4 +1,3 @@
-import 'package:cmp/models/media_player_item.dart';
 import 'package:cmp/services/media_player.dart';
 import 'package:just_audio/just_audio.dart';
 

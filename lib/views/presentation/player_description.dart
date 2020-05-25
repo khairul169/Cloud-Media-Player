@@ -1,4 +1,4 @@
-import 'package:cmp/models/media_player_item.dart';
+import 'package:cmp/services/media_player.dart';
 import 'package:flutter/material.dart';
 
 class PlayerDescription extends StatelessWidget {

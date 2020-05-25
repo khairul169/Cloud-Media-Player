@@ -1,6 +1,6 @@
 import 'package:async_redux/async_redux.dart';
 import 'package:cmp/actions/playback.dart';
-import 'package:cmp/models/media_player_item.dart';
+import 'package:cmp/services/media_player.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:cmp/states/playback_state.dart';
 import 'package:cmp/views/presentation/player_controller.dart';

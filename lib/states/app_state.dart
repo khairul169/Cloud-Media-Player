@@ -1,32 +1,37 @@
-import 'package:cmp/models/media.dart';
 import 'package:cmp/models/playlist.dart';
 import 'package:cmp/states/playback_state.dart';
 
 class AppState {
-  final List<Media> mediaList;
+  /// Media player state
   final PlaybackState playback;
   final Playlist playlist;
 
+  /// User playlist
+  final List<Playlist> userPlaylists;
+
   AppState({
-    this.mediaList,
     this.playback,
     this.playlist,
+    this.userPlaylists,
   });
 
-  factory AppState.initialState() => AppState(
-        mediaList: List<Media>(),
-        playback: PlaybackState(),
-        playlist: Playlist(),
-      );
+  factory AppState.initialState() {
+    return AppState(
+      playback: PlaybackState(),
+      playlist: Playlist(),
+      userPlaylists: null,
+    );
+  }
 
   AppState copyWith({
-    List<Media> mediaList,
     PlaybackState playback,
     Playlist playlist,
-  }) =>
-      AppState(
-        mediaList: mediaList ?? this.mediaList,
-        playback: playback ?? this.playback,
-        playlist: playlist ?? this.playlist,
-      );
+    List<Playlist> userPlaylists,
+  }) {
+    return AppState(
+      playback: playback ?? this.playback,
+      playlist: playlist ?? this.playlist,
+      userPlaylists: userPlaylists ?? this.userPlaylists,
+    );
+  }
 }

@@ -17,7 +17,6 @@ class OfflineMediaService {
     res.stream.listen(null, onDone: () {
       setLocalPath(media.id, res.path).then((_) => completer.complete());
     });
-
     await completer.future;
   }
 
@@ -46,5 +45,20 @@ class OfflineMediaService {
   /// Remove local media path data
   static Future<void> removeLocal(int id) async {
     await DBProvider.remove(DBProvider.storeItems, id);
+  }
+
+  /// Check media offline availability
+  static Future<Media> check(Media media) async {
+    var localPath = await OfflineMediaService.getLocalPath(media.id);
+    return media.withLocalPath(localPath);
+  }
+
+  /// Check list of media offline availability
+  static Future<List<Media>> checkAll(List<Media> mediaList) async {
+    for (Media media in mediaList) {
+      var idx = mediaList.indexOf(media);
+      mediaList[idx] = await check(media);
+    }
+    return mediaList;
   }
 }
