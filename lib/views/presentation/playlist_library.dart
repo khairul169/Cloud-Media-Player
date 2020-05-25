@@ -11,7 +11,7 @@ class PlaylistLibrary extends StatelessWidget {
     return ListView.builder(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
-      itemCount: 5,
+      itemCount: 3,
       itemBuilder: (_, index) {
         return PlaylistItem();
       },

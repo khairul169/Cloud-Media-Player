@@ -44,6 +44,7 @@ class MediaListItem extends StatelessWidget {
             ),
             SizedBox(width: 16),
             buildIndicator(),
+            SizedBox(width: 8),
             ActionButton(
               icon: Icons.favorite_border,
               onPress: () {},

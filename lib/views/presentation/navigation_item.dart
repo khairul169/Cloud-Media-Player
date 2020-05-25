@@ -24,7 +24,7 @@ class NavigationItem extends StatelessWidget {
       onTap: onPress,
       child: Container(
         height: 48,
-        padding: EdgeInsets.only(top: 8, right: 16),
+        padding: EdgeInsets.fromLTRB(16, 8, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

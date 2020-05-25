@@ -63,24 +63,21 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 16),
-              Text(
-                'Browse',
-                style: Theme.of(context).textTheme.headline1,
-              ),
-              SizedBox(height: 8),
-              NavigationBar(
-                items: ['Library', 'Popular'],
-                onSelect: (id) {},
-              ),
-            ],
+          margin: EdgeInsets.fromLTRB(16, 24, 16, 8),
+          child: Text(
+            'Browse',
+            style: Theme.of(context).textTheme.headline1,
           ),
         ),
-        SectionTitle(title: 'Playlist'),
+        NavigationBar(
+          items: ['Library', 'Popular'],
+          onSelect: (id) {},
+        ),
+        SizedBox(height: 16),
+        SectionTitle(
+          title: 'Playlist',
+          onMore: () {},
+        ),
         PlaylistLibrary(),
         SizedBox(height: 24),
         SectionTitle(
