@@ -52,7 +52,7 @@ class MediaPlayer {
 
     // Position change
     var positionListener =
-        player.getPositionStream(Duration(milliseconds: 500)).listen((data) {
+        player.getPositionStream(Duration(milliseconds: 1000)).listen((data) {
       var position = data?.inMilliseconds ?? 0;
       _setState(position: position);
     });
