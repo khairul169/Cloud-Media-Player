@@ -40,6 +40,10 @@ class MediaListItem extends StatelessWidget {
               child: buildDescription(),
             ),
             SizedBox(width: 16),
+            Text(
+              Utils.timeToString(item.duration.toInt()),
+              style: TextStyle(color: Colors.white.withOpacity(0.8)),
+            ),
             buildIndicator(),
             SizedBox(width: 8),
             ActionButton(
@@ -75,15 +79,21 @@ class MediaListItem extends StatelessWidget {
   Widget buildIndicator() {
     // Progress
     if (item.waiting) {
-      return CircleProgress();
+      return Container(
+        margin: EdgeInsets.only(left: 16),
+        child: CircleProgress(),
+      );
     }
 
     // Downloaded
     if (item.localPath != null) {
-      return CircleShape(
-        color: Colors.green,
-        child: Icon(Icons.file_download, size: 14),
-        size: 24,
+      return Container(
+        margin: EdgeInsets.only(left: 16),
+        child: CircleShape(
+          color: Colors.green,
+          child: Icon(Icons.file_download, size: 14),
+          size: 24,
+        ),
       );
     }
 

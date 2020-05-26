@@ -7,7 +7,7 @@ class Media {
   final String album;
   final int year;
   final String image;
-  final int duration;
+  final double duration;
   final String url;
 
   final bool waiting;
@@ -46,7 +46,7 @@ class Media {
     String album,
     int year,
     String image,
-    int duration,
+    double duration,
     String url,
     bool waiting,
     String localPath,
@@ -65,6 +65,7 @@ class Media {
       album: album ?? this.album,
       year: year ?? this.year,
       image: image ?? this.image,
+      duration: duration ?? this.duration,
       url: url ?? this.url,
       waiting: waiting ?? this.waiting,
       localPath: path,
