@@ -63,7 +63,9 @@ class UserPlaylistAddItem extends ReduxAction<AppState> {
     if (item is html.File) {
       await uploadFileWeb(item);
     }
-    dispatch(FetchUserPlaylist());
+
+    // Refresh playlist
+    await dispatchFuture(FetchUserPlaylist());
     return null;
   }
 }

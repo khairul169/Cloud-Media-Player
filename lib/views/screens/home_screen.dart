@@ -9,6 +9,7 @@ import 'package:cmp/views/presentation/navigation_bar.dart';
 import 'package:cmp/views/presentation/playlist_library.dart';
 import 'package:cmp/views/presentation/section_title.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_html/html.dart' as html;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -24,6 +25,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> onRefresh() async {
     await StoreProvider.dispatchFuture(context, FetchUserPlaylist());
+  }
+
+  Future<void> onFilesDropped(List<html.File> files) async {
+    for (var file in files) {
+      print('Uploading ' + file.name);
+      await StoreProvider.dispatchFuture(context, UserPlaylistAddItem(0, file));
+    }
   }
 
   @override
@@ -88,10 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
         FileDropZone(
           child: buildMediaList(),
           hoverColor: Colors.blue.withOpacity(0.5),
-          onDrop: (files) {
-            print('Uploading ' + files[0].name);
-            StoreProvider.dispatch(context, UserPlaylistAddItem(0, files[0]));
-          },
+          onDrop: (files) => onFilesDropped(files),
         ),
         SizedBox(height: 16),
       ],
