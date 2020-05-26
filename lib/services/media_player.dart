@@ -165,15 +165,15 @@ class MediaPlayer {
   void setVolume(double volume) => player.setVolume(volume);
 
   void onPlaybackComplete() {
-    if (!queueMode || queue == null || repeatMode == AudioRepeatMode.None)
-      return;
+    if (!queueMode || queue == null) return;
 
     // Repeat media
     if (repeatMode == AudioRepeatMode.Single) {
       playMediaId(curIndex);
-    } else if (repeatMode == AudioRepeatMode.All ||
-        curIndex < queue.length - 1) {
-      skipIndex(1);
+    } else {
+      if (curIndex < queue.length - 1 || repeatMode == AudioRepeatMode.All) {
+        skipIndex(1);
+      }
     }
   }
 

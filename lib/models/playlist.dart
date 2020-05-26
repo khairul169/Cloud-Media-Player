@@ -14,7 +14,10 @@ class Playlist {
   }
 
   List<MediaPlayerItem> toMediaQueue() {
-    return items.map((e) => e.toPlayerItem()).toList();
+    return items
+        .where((e) => e.url != null || e.localPath != null)
+        .map((e) => e.toPlayerItem())
+        .toList();
   }
 
   Playlist copyWith({List<Media> items}) {

@@ -40,12 +40,11 @@ class UserPlaylistAddItem extends ReduxAction<AppState> {
 
   Future<void> uploadFileWeb(html.File file) async {
     // Create a placeholder
-    placeholder(file.name);
+    var title = file.name;
+    placeholder(title.substring(0, title.lastIndexOf('.')));
 
     await Future.delayed(Duration(milliseconds: 500));
-
-    var result = await APIHelper.uploadFile('media/upload', file);
-    print(result.body);
+    await APIHelper.uploadFile('media/upload', file);
   }
 
   void placeholder(String title) {
@@ -69,6 +68,32 @@ class UserPlaylistAddItem extends ReduxAction<AppState> {
   }
 }
 
+class UserPlaylistDeleteItem extends ReduxAction<AppState> {
+  final int playlistIndex;
+  final int index;
+
+  UserPlaylistDeleteItem(this.playlistIndex, this.index);
+
+  @override
+  Future<AppState> reduce() async {
+    // Remove playlist item
+    var playlist = state.userPlaylists[playlistIndex];
+
+    dispatch(UserPlaylistReplace(
+      playlistIndex,
+      playlist.remove(index),
+    ));
+
+    var mediaId = playlist.items[index].id;
+    if (mediaId != null) {
+      await APIHelper.post('media/delete/$mediaId', null);
+    }
+
+    dispatch(FetchUserPlaylist());
+    return null;
+  }
+}
+
 class UserPlaylistReplace extends ReduxAction<AppState> {
   final int index;
   final Playlist playlist;
@@ -80,21 +105,6 @@ class UserPlaylistReplace extends ReduxAction<AppState> {
     var playlists = state.userPlaylists;
     playlists[index] = playlist;
     return state.copyWith(userPlaylists: playlists);
-  }
-}
-
-class UserPlaylistDeleteItem extends ReduxAction<AppState> {
-  final int playlistIndex;
-  final int index;
-
-  UserPlaylistDeleteItem(this.playlistIndex, this.index);
-
-  @override
-  AppState reduce() {
-    // Remove playlist item
-    var playlist = state.userPlaylists[playlistIndex];
-    dispatch(UserPlaylistReplace(playlistIndex, playlist.remove(index)));
-    return null;
   }
 }
 

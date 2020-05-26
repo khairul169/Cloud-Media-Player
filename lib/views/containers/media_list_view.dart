@@ -32,9 +32,9 @@ class _MediaListViewState extends State<MediaListView> {
     _itemsController.close();
   }
 
-  void onStartMedia(BuildContext context, int index) {
+  void onStartMedia(BuildContext context, List<Media> list, int index) {
     // Play media
-    var playlist = Playlist(items: widget.items);
+    var playlist = Playlist(items: list);
     StoreProvider.dispatch(context, SetPlaybackList(playlist, playId: index));
   }
 
@@ -68,6 +68,14 @@ class _MediaListViewState extends State<MediaListView> {
       );
     }
 
+    if (widget.items.length == 0) {
+      return SizedBox(
+        height: 48,
+        child: Center(child: Text('No Media')),
+      );
+    }
+
+    // Update stream items
     _itemsController.add(widget.items);
 
     return StreamBuilder(
@@ -95,23 +103,24 @@ class _MediaListViewState extends State<MediaListView> {
     return MediaListItem(
       item: item,
       onPress: () {
-        onStartMedia(context, index);
+        onStartMedia(context, items, index);
       },
       onMenu: () {
-        showItemMenu(context, index);
+        showItemMenu(context, item, index);
       },
     );
   }
 
-  void showItemMenu(BuildContext context, int index) {
+  void showItemMenu(BuildContext context, Media item, int index) {
     showModalBottomSheet(
       context: context,
-      builder: (ctx) => Wrap(children: getItemMenu(ctx, index)),
+      builder: (ctx) => Wrap(
+        children: getItemMenu(ctx, item, index),
+      ),
     );
   }
 
-  List<Widget> getItemMenu(BuildContext ctx, int index) {
-    Media item = widget.items[index];
+  List<Widget> getItemMenu(BuildContext ctx, Media item, int index) {
     return [
       ListTile(
         leading: Icon(Icons.favorite_border),
@@ -123,7 +132,9 @@ class _MediaListViewState extends State<MediaListView> {
       !kIsWeb
           ? ListTile(
               leading: Icon(Icons.file_download),
-              title: Text(item.localPath != null ? 'Remove Downloaded' : 'Download Media'),
+              title: Text(item.localPath != null
+                  ? 'Remove Downloaded'
+                  : 'Download Media'),
               onTap: () {
                 onDownload(index);
                 Navigator.pop(ctx);

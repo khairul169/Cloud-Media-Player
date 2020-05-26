@@ -39,7 +39,7 @@ class APIHelper {
       if (method == RequestMethod.Post) {
         response = await http.post(
           url,
-          body: jsonEncode(body),
+          body: body != null ? jsonEncode(body) : null,
           headers: headers,
         );
       } else {

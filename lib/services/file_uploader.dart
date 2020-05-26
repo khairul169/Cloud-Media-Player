@@ -15,6 +15,10 @@ class FileUploader extends MultipartRequest {
   @override
   ByteStream finalize() {
     var stream = super.finalize();
+    if (onProgress == null && onComplete == null) {
+      return stream;
+    }
+
     final totalBytes = this.contentLength;
     int bytes = 0;
 
