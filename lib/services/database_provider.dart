@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:idb_shim/idb.dart';
+import 'package:idb_shim/idb_browser.dart';
 import 'package:idb_sqflite/idb_client_sqflite.dart';
 import 'package:sqflite/sqflite.dart' as sqflite;
 
@@ -14,7 +16,9 @@ class DBProvider {
     }
 
     // Database factory
-    var idbFactory = getIdbFactorySqflite(sqflite.databaseFactory);
+    var idbFactory = kIsWeb
+        ? idbFactoryBrowser
+        : getIdbFactorySqflite(sqflite.databaseFactory);
 
     // Open database
     _db = await idbFactory.open(

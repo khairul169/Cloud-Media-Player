@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:async_redux/async_redux.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cmp/actions/playback.dart';
@@ -30,9 +31,12 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Theme.of(context).scaffoldBackgroundColor,
-    ));
+    // Set android statusbar color
+    if (!kIsWeb && Platform.isAndroid) {
+      SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        statusBarColor: Theme.of(context).scaffoldBackgroundColor,
+      ));
+    }
 
     var home = HomeScreen();
     return !kIsWeb ? AudioServiceWidget(child: home) : home;

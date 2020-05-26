@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:isolate';
 import 'dart:ui';
 import 'package:cmp/public/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -114,14 +115,20 @@ class DownloadService {
 
   static BaseDownloadService get instance {
     if (_instance == null) {
-      _instance = DefaultDownloadService();
+      _instance = !kIsWeb ? DefaultDownloadService() : null;
     }
     return _instance;
   }
 
-  static Future<DownloadResult> download(String url, [String filename]) =>
-      instance.download(url, filename);
-  static Future<String> getPath(String filename) => instance.getPath(filename);
+  static Future<DownloadResult> download(String url, [String filename]) {
+    if (kIsWeb) throw Exception('Web not supported.');
+    return instance.download(url, filename);
+  }
+
+  static Future<String> getPath(String filename) {
+    if (kIsWeb) throw Exception('Web not supported.');
+    return instance.getPath(filename);
+  }
 }
 
 abstract class BaseDownloadService {

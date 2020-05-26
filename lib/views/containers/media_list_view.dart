@@ -5,6 +5,7 @@ import 'package:cmp/models/playlist.dart';
 import 'package:cmp/services/offline_media_service.dart';
 import 'package:cmp/views/presentation/circle_progress.dart';
 import 'package:cmp/views/presentation/media_list_item.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MediaListView extends StatelessWidget {
@@ -79,14 +80,16 @@ class MediaListView extends StatelessWidget {
           Navigator.pop(ctx);
         },
       ),
-      ListTile(
-        leading: Icon(Icons.file_download),
-        title: Text(item.local ? 'Remove Downloaded' : 'Download Media'),
-        onTap: () {
-          onDownload(index);
-          Navigator.pop(ctx);
-        },
-      ),
+      !kIsWeb
+          ? ListTile(
+              leading: Icon(Icons.file_download),
+              title: Text(item.local ? 'Remove Downloaded' : 'Download Media'),
+              onTap: () {
+                onDownload(index);
+                Navigator.pop(ctx);
+              },
+            )
+          : Container(),
       ListTile(
         leading: Icon(Icons.delete_outline),
         title: Text('Delete'),

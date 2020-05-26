@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cmp/models/media.dart';
 import 'package:cmp/services/database_provider.dart';
 import 'package:cmp/services/download_service.dart';
+import 'package:flutter/foundation.dart';
 
 class OfflineMediaService {
   /// Download media to local storage
@@ -49,12 +50,20 @@ class OfflineMediaService {
 
   /// Check media offline availability
   static Future<Media> check(Media media) async {
+    if (kIsWeb) {
+      return media;
+    }
+
     var localPath = await OfflineMediaService.getLocalPath(media.id);
     return media.withLocalPath(localPath);
   }
 
   /// Check list of media offline availability
   static Future<List<Media>> checkAll(List<Media> mediaList) async {
+    if (kIsWeb) {
+      return mediaList;
+    }
+
     for (Media media in mediaList) {
       var idx = mediaList.indexOf(media);
       mediaList[idx] = await check(media);
