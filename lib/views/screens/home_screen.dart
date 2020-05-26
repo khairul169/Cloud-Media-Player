@@ -4,6 +4,7 @@ import 'package:cmp/models/media.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
 import 'package:cmp/views/containers/playback_panel_view.dart';
+import 'package:cmp/views/presentation/file_dropzone.dart';
 import 'package:cmp/views/presentation/navigation_bar.dart';
 import 'package:cmp/views/presentation/playlist_library.dart';
 import 'package:cmp/views/presentation/section_title.dart';
@@ -84,23 +85,33 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Local Media',
           onMore: () {},
         ),
-        StoreConnector<AppState, List<Media>>(
-          converter: (store) {
-            var playlists = store.state.userPlaylists;
-            if (playlists != null && playlists.length > 0) {
-              return playlists[0].items;
-            }
-            return null;
+        FileDropZone(
+          child: buildMediaList(),
+          hoverColor: Colors.blue.withOpacity(0.5),
+          onDrop: (files) {
+            print(files[0].name);
           },
-          builder: (_, mediaList) => MediaListView(
-            items: mediaList,
-            onUpdate: (id) {
-              onRefresh();
-            },
-          ),
         ),
         SizedBox(height: 16),
       ],
+    );
+  }
+
+  StoreConnector<AppState, List<Media>> buildMediaList() {
+    return StoreConnector<AppState, List<Media>>(
+      converter: (store) {
+        var playlists = store.state.userPlaylists;
+        if (playlists != null && playlists.length > 0) {
+          return playlists[0].items;
+        }
+        return null;
+      },
+      builder: (_, mediaList) => MediaListView(
+        items: mediaList,
+        onUpdate: (id) {
+          onRefresh();
+        },
+      ),
     );
   }
 }
