@@ -83,7 +83,7 @@ class MediaListItem extends StatelessWidget {
     }
 
     // Downloaded
-    if (item.local) {
+    if (item.localPath != null) {
       return CircleShape(
         color: Colors.green,
         child: Icon(Icons.file_download, size: 14),

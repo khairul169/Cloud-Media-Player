@@ -108,7 +108,9 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       builder: (_, mediaList) => MediaListView(
         items: mediaList,
-        onDelete: (id) {},
+        onDelete: (id) {
+          StoreProvider.dispatch(context, DeleteUserPlaylistItem(0, id));
+        },
       ),
     );
   }

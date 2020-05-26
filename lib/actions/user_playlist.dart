@@ -1,7 +1,7 @@
 import 'package:async_redux/async_redux.dart';
 import 'package:cmp/models/playlist.dart';
 import 'package:cmp/services/api_helper.dart';
-import 'package:cmp/services/offline_media_service.dart';
+import 'package:cmp/services/media_storage.dart';
 import 'package:cmp/states/app_state.dart';
 
 class FetchUserPlaylist extends ReduxAction<AppState> {
@@ -16,11 +16,11 @@ class FetchUserPlaylist extends ReduxAction<AppState> {
 
       // Check offline availability
       playlist = playlist.copyWith(
-        items: await OfflineMediaService.checkAll(playlist.items),
+        items: await MediaStorage.checkAll(playlist.items),
       );
 
       // Update state
-      dispatch(SetUserPlaylist([playlist]));
+      dispatch(SetUserPlaylists([playlist]));
     } catch (error) {
       // Error catched
       print(error);
@@ -30,12 +30,43 @@ class FetchUserPlaylist extends ReduxAction<AppState> {
   }
 }
 
-class SetUserPlaylist extends ReduxAction<AppState> {
-  final List<Playlist> playlist;
-  SetUserPlaylist(this.playlist);
+class ReplaceUserPlaylist extends ReduxAction<AppState> {
+  final int index;
+  final Playlist playlist;
+
+  ReplaceUserPlaylist(this.index, this.playlist);
 
   @override
-  Future<AppState> reduce() async {
-    return state.copyWith(userPlaylists: playlist);
+  AppState reduce() {
+    var playlists = state.userPlaylists;
+    playlists[index] = playlist;
+    return state.copyWith(userPlaylists: playlists);
+  }
+}
+
+class DeleteUserPlaylistItem extends ReduxAction<AppState> {
+  final int playlistIndex;
+  final int index;
+
+  DeleteUserPlaylistItem(this.playlistIndex, this.index);
+
+  @override
+  AppState reduce() {
+    var playlists = state.userPlaylists;
+    var removed = playlists[playlistIndex].removeItem(index);
+
+    // Replace playlist
+    dispatch(ReplaceUserPlaylist(playlistIndex, removed));
+    return null;
+  }
+}
+
+class SetUserPlaylists extends ReduxAction<AppState> {
+  final List<Playlist> items;
+  SetUserPlaylists(this.items);
+
+  @override
+  AppState reduce() {
+    return state.copyWith(userPlaylists: items);
   }
 }

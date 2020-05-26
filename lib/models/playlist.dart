@@ -20,4 +20,10 @@ class Playlist {
   Playlist copyWith({List<Media> items}) {
     return Playlist(items: items ?? this.items);
   }
+
+  Playlist removeItem(int index) {
+    var newItems = List<Media>.from(items);
+    newItems.removeAt(index);
+    return copyWith(items: newItems);
+  }
 }

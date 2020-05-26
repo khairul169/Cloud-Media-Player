@@ -26,16 +26,18 @@ class Media {
     this.localPath,
   });
 
-  factory Media.fromJson(dynamic json) => Media(
+  factory Media.fromJson(dynamic json) {
+    return Media(
       id: json['id'],
       title: json['title'],
       artist: json['artist'],
       album: json['album'],
       year: json['year'],
       image: json['image'],
-      url: json['url']);
-
-  bool get local => (localPath != null);
+      duration: json['duration'],
+      url: json['url'],
+    );
+  }
 
   Media copyWith({
     int id,

@@ -92,15 +92,16 @@ class SetPlaybackRepeat extends ReduxAction<AppState> {
 }
 
 // Playlist
-class SetPlaylist extends ReduxAction<AppState> {
+class SetPlaybackList extends ReduxAction<AppState> {
   final Playlist playlist;
   final int playId;
-  SetPlaylist(this.playlist, {this.playId});
+
+  SetPlaybackList(this.playlist, {this.playId});
 
   @override
   AppState reduce() {
     MediaService.setPlaylist(playlist.toMediaQueue());
     if (playId != null) MediaService.playIndex(playId);
-    return state.copyWith(playlist: playlist);
+    return state.copyWith(playbackList: playlist);
   }
 }

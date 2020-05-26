@@ -4,33 +4,33 @@ import 'package:cmp/states/playback_state.dart';
 class AppState {
   /// Media player state
   final PlaybackState playback;
-  final Playlist playlist;
+  final Playlist playbackList;
 
   /// User playlist
   final List<Playlist> userPlaylists;
 
   AppState({
     this.playback,
-    this.playlist,
+    this.playbackList,
     this.userPlaylists,
   });
 
   factory AppState.initialState() {
     return AppState(
       playback: PlaybackState(),
-      playlist: Playlist(),
+      playbackList: Playlist(),
       userPlaylists: null,
     );
   }
 
   AppState copyWith({
     PlaybackState playback,
-    Playlist playlist,
+    Playlist playbackList,
     List<Playlist> userPlaylists,
   }) {
     return AppState(
       playback: playback ?? this.playback,
-      playlist: playlist ?? this.playlist,
+      playbackList: playbackList ?? this.playbackList,
       userPlaylists: userPlaylists ?? this.userPlaylists,
     );
   }

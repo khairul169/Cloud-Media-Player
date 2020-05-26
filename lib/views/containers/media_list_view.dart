@@ -3,7 +3,7 @@ import 'package:async_redux/async_redux.dart';
 import 'package:cmp/actions/playback.dart';
 import 'package:cmp/models/media.dart';
 import 'package:cmp/models/playlist.dart';
-import 'package:cmp/services/offline_media_service.dart';
+import 'package:cmp/services/media_storage.dart';
 import 'package:cmp/views/presentation/circle_progress.dart';
 import 'package:cmp/views/presentation/media_list_item.dart';
 import 'package:flutter/foundation.dart';
@@ -35,7 +35,7 @@ class _MediaListViewState extends State<MediaListView> {
   void onStartMedia(BuildContext context, int index) {
     // Play media
     var playlist = Playlist(items: widget.items);
-    StoreProvider.dispatch(context, SetPlaylist(playlist, playId: index));
+    StoreProvider.dispatch(context, SetPlaybackList(playlist, playId: index));
   }
 
   Future<void> onDownload(int index) async {
@@ -49,10 +49,10 @@ class _MediaListViewState extends State<MediaListView> {
     // Wait for bottom sheet closed
     await Future.delayed(Duration(milliseconds: 500));
 
-    if (!media.local) {
-      itemList[index] = await OfflineMediaService.download(media);
+    if (media.localPath == null) {
+      itemList[index] = await MediaStorage.download(media);
     } else {
-      itemList[index] = await OfflineMediaService.remove(media);
+      itemList[index] = await MediaStorage.remove(media);
     }
 
     itemList[index] = itemList[index].copyWith(waiting: false);
@@ -67,6 +67,9 @@ class _MediaListViewState extends State<MediaListView> {
         child: Center(child: CircleProgress(size: 48)),
       );
     }
+
+    _itemsController.add(widget.items);
+
     return StreamBuilder(
       stream: _itemsController.stream,
       initialData: widget.items,
@@ -74,12 +77,21 @@ class _MediaListViewState extends State<MediaListView> {
         shrinkWrap: true,
         physics: NeverScrollableScrollPhysics(),
         itemCount: widget.items.length,
-        itemBuilder: (_, i) => buildMediaListItem(context, snapshot.data[i], i),
+        itemBuilder: (_, i) => buildMediaListItem(context, snapshot.data, i),
       ),
     );
   }
 
-  Widget buildMediaListItem(BuildContext context, Media item, int index) {
+  Widget buildMediaListItem(
+    BuildContext context,
+    List<Media> items,
+    int index,
+  ) {
+    if (index < 0 || index >= items.length) {
+      return Container();
+    }
+
+    var item = items[index];
     return MediaListItem(
       item: item,
       onPress: () {
@@ -111,7 +123,7 @@ class _MediaListViewState extends State<MediaListView> {
       !kIsWeb
           ? ListTile(
               leading: Icon(Icons.file_download),
-              title: Text(item.local ? 'Remove Downloaded' : 'Download Media'),
+              title: Text(item.localPath != null ? 'Remove Downloaded' : 'Download Media'),
               onTap: () {
                 onDownload(index);
                 Navigator.pop(ctx);

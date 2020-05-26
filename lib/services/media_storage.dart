@@ -5,10 +5,10 @@ import 'package:cmp/services/database_provider.dart';
 import 'package:cmp/services/download_service.dart';
 import 'package:flutter/foundation.dart';
 
-class OfflineMediaService {
+class MediaStorage {
   /// Download media to local storage
   static Future<Media> download(Media media) async {
-    if (media.local) {
+    if (media.localPath != null) {
       return media;
     }
 
@@ -26,7 +26,7 @@ class OfflineMediaService {
 
   /// Remove media from local storage
   static Future<Media> remove(Media media) async {
-    if (!media.local) {
+    if (media.localPath == null) {
       return media;
     }
 
@@ -59,7 +59,7 @@ class OfflineMediaService {
       return media;
     }
 
-    var localPath = await OfflineMediaService.getLocalPath(media.id);
+    var localPath = await getLocalPath(media.id);
     return media.copyWith(localPath: localPath ?? 'null');
   }
 
