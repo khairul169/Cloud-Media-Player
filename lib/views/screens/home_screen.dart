@@ -108,9 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       builder: (_, mediaList) => MediaListView(
         items: mediaList,
-        onUpdate: (id) {
-          onRefresh();
-        },
+        onDelete: (id) {},
       ),
     );
   }

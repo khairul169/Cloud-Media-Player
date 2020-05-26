@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:async_redux/async_redux.dart';
 import 'package:cmp/actions/playback.dart';
 import 'package:cmp/models/media.dart';
@@ -8,52 +9,79 @@ import 'package:cmp/views/presentation/media_list_item.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-class MediaListView extends StatelessWidget {
+class MediaListView extends StatefulWidget {
   final List<Media> items;
   final Function(int index) onDelete;
-  final Function(int index) onUpdate;
 
-  MediaListView({this.items, this.onDelete, this.onUpdate});
+  MediaListView({
+    Key key,
+    @required this.items,
+    @required this.onDelete,
+  }) : super(key: key);
+
+  @override
+  _MediaListViewState createState() => _MediaListViewState();
+}
+
+class _MediaListViewState extends State<MediaListView> {
+  final _itemsController = StreamController();
+
+  @override
+  void dispose() {
+    super.dispose();
+    _itemsController.close();
+  }
 
   void onStartMedia(BuildContext context, int index) {
     // Play media
-    var playlist = Playlist(items: items);
+    var playlist = Playlist(items: widget.items);
     StoreProvider.dispatch(context, SetPlaylist(playlist, playId: index));
   }
 
   Future<void> onDownload(int index) async {
-    var media = items[index];
+    var itemList = widget.items;
+    var media = itemList[index].copyWith(waiting: true);
+
+    // Set waiting
+    itemList[index] = media;
+    _itemsController.add(itemList);
+
+    // Wait for bottom sheet closed
     await Future.delayed(Duration(milliseconds: 500));
 
     if (!media.local) {
-      await OfflineMediaService.download(media);
+      itemList[index] = await OfflineMediaService.download(media);
     } else {
-      await OfflineMediaService.remove(media);
+      itemList[index] = await OfflineMediaService.remove(media);
     }
 
-    // Update media list
-    if (onUpdate != null) onUpdate(index);
+    itemList[index] = itemList[index].copyWith(waiting: false);
+    _itemsController.add(itemList);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (items == null) {
+    if (widget.items == null) {
       return SizedBox(
         height: 200,
         child: Center(child: CircleProgress(size: 48)),
       );
     }
-    return ListView.builder(
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      itemCount: items.length,
-      itemBuilder: buildMediaListItem,
+    return StreamBuilder(
+      stream: _itemsController.stream,
+      initialData: widget.items,
+      builder: (_, snapshot) => ListView.builder(
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        itemCount: widget.items.length,
+        itemBuilder: (_, i) => buildMediaListItem(context, snapshot.data[i], i),
+      ),
     );
   }
 
-  Widget buildMediaListItem(BuildContext context, int index) {
+  Widget buildMediaListItem(BuildContext context, Media item, int index) {
     return MediaListItem(
-      item: items[index],
+      item: item,
       onPress: () {
         onStartMedia(context, index);
       },
@@ -71,7 +99,7 @@ class MediaListView extends StatelessWidget {
   }
 
   List<Widget> getItemMenu(BuildContext ctx, int index) {
-    Media item = items[index];
+    Media item = widget.items[index];
     return [
       ListTile(
         leading: Icon(Icons.favorite_border),
@@ -94,7 +122,7 @@ class MediaListView extends StatelessWidget {
         leading: Icon(Icons.delete_outline),
         title: Text('Delete'),
         onTap: () {
-          if (onDelete != null) onDelete(index);
+          widget.onDelete(index);
           Navigator.pop(ctx);
         },
       ),

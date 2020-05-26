@@ -7,29 +7,34 @@ import 'package:flutter/foundation.dart';
 
 class OfflineMediaService {
   /// Download media to local storage
-  static Future<void> download(Media media) async {
+  static Future<Media> download(Media media) async {
     if (media.local) {
-      return;
+      return media;
     }
 
     var res = await DownloadService.download(media.url);
-    var completer = Completer();
+    var completer = Completer<Media>();
 
     res.stream.listen(null, onDone: () {
-      setLocalPath(media.id, res.path).then((_) => completer.complete());
+      setLocalPath(media.id, res.path).then((_) {
+        completer.complete(media.copyWith(localPath: res.path));
+      });
     });
-    await completer.future;
+
+    return completer.future;
   }
 
   /// Remove media from local storage
-  static Future<void> remove(Media media) async {
+  static Future<Media> remove(Media media) async {
     if (!media.local) {
-      return;
+      return media;
     }
 
     // Delete local file
     await File(media.localPath).delete();
     await removeLocal(media.id);
+
+    return media.copyWith(localPath: 'null');
   }
 
   /// Get media stored local path
@@ -55,7 +60,7 @@ class OfflineMediaService {
     }
 
     var localPath = await OfflineMediaService.getLocalPath(media.id);
-    return media.withLocalPath(localPath);
+    return media.copyWith(localPath: localPath ?? 'null');
   }
 
   /// Check list of media offline availability

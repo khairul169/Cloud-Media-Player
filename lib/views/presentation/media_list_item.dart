@@ -1,6 +1,7 @@
 import 'package:cmp/models/media.dart';
 import 'package:cmp/public/utils.dart';
 import 'package:cmp/views/presentation/action_button.dart';
+import 'package:cmp/views/presentation/circle_progress.dart';
 import 'package:cmp/views/presentation/circle_shape.dart';
 import 'package:flutter/material.dart';
 
@@ -76,11 +77,12 @@ class MediaListItem extends StatelessWidget {
   }
 
   Widget buildIndicator() {
-    /*
-    return CircleProgress(
-      value: 0.8,
-    );
-    */
+    // Progress
+    if (item.waiting) {
+      return CircleProgress();
+    }
+
+    // Downloaded
     if (item.local) {
       return CircleShape(
         color: Colors.green,
@@ -88,6 +90,8 @@ class MediaListItem extends StatelessWidget {
         size: 24,
       );
     }
+
+    // No indicator
     return Container();
   }
 }
