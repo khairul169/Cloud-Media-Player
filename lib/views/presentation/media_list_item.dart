@@ -39,12 +39,12 @@ class MediaListItem extends StatelessWidget {
             Expanded(
               child: buildDescription(),
             ),
+            buildIndicator(),
             SizedBox(width: 16),
             Text(
               Utils.timeToString(item.duration.toInt()),
               style: TextStyle(color: Colors.white.withOpacity(0.8)),
             ),
-            buildIndicator(),
             SizedBox(width: 8),
             ActionButton(
               icon: Icons.favorite_border,
