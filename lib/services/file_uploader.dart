@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:cmp/models/api_result.dart';
+import 'package:cmp/public/utils.dart';
 import 'package:http/http.dart';
+import 'package:universal_html/html.dart' as html;
 
 class FileUploader extends MultipartRequest {
   final Function(int bytes, int totalBytes) onProgress;
@@ -37,7 +39,13 @@ class FileUploader extends MultipartRequest {
 
   Future<void> addFile(String key, File file) async {
     var path = file.path;
-    var fileMultipart = await MultipartFile.fromPath(key, path);
-    this.files.add(fileMultipart);
+    var multipart = await MultipartFile.fromPath(key, path);
+    this.files.add(multipart);
+  }
+
+  Future<void> addFileHtml(String key, html.File file) async {
+    var bytes = await Utils.htmlFileToBytes(file);
+    var multipart = MultipartFile.fromBytes(key, bytes, filename: file.name);
+    this.files.add(multipart);
   }
 }

@@ -21,7 +21,13 @@ class Playlist {
     return Playlist(items: items ?? this.items);
   }
 
-  Playlist removeItem(int index) {
+  Playlist add(Media media) {
+    var newItems = List<Media>.from(items);
+    newItems.add(media);
+    return copyWith(items: newItems);
+  }
+
+  Playlist remove(int index) {
     var newItems = List<Media>.from(items);
     newItems.removeAt(index);
     return copyWith(items: newItems);

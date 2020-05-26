@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cmp/models/api_result.dart';
 import 'package:cmp/services/file_uploader.dart';
 import 'package:http/http.dart' as http;
+import 'package:universal_html/html.dart' as html;
 
 const API_URL = 'http://192.168.43.48/cmp-api/';
 
@@ -58,14 +59,20 @@ class APIHelper {
 
   static Future<http.Response> uploadFile(
     String url,
-    File file, {
+    dynamic file, {
     Function(int, int) onProgress,
   }) async {
     if (file == null) return null;
 
     final uri = Uri.parse(API_URL + url);
     final request = new FileUploader(uri, onProgress: onProgress);
-    await request.addFile('media', file);
+
+    if (file is File) {
+      await request.addFile('media', file);
+    }
+    if (file is html.File) {
+      await request.addFileHtml('media', file);
+    }
 
     // Send response
     final response = await request.send();

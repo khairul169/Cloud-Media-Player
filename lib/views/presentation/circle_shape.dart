@@ -13,14 +13,14 @@ class CircleShape extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(size / 2.0),
+      child: Container(
+        width: size,
+        height: size,
         color: color,
-        borderRadius: BorderRadius.circular(size / 2.0),
+        child: child,
       ),
-      child: child,
     );
   }
 }

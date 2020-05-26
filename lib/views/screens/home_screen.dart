@@ -89,7 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
           child: buildMediaList(),
           hoverColor: Colors.blue.withOpacity(0.5),
           onDrop: (files) {
-            print(files[0].name);
+            print('Uploading ' + files[0].name);
+            StoreProvider.dispatch(context, UserPlaylistAddItem(0, files[0]));
           },
         ),
         SizedBox(height: 16),
@@ -109,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_, mediaList) => MediaListView(
         items: mediaList,
         onDelete: (id) {
-          StoreProvider.dispatch(context, DeleteUserPlaylistItem(0, id));
+          StoreProvider.dispatch(context, UserPlaylistDeleteItem(0, id));
         },
       ),
     );

@@ -26,18 +26,14 @@ class MediaListItem extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(16, 8, 4, 8),
         child: Row(
           children: <Widget>[
-            Center(
-              child: SizedBox(
-                width: 36,
-                height: 36,
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(18),
-                  child: Image.network(
-                    item.image,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
+            CircleShape(
+              size: 36,
+              child: item.image != null
+                  ? Image.network(
+                      item.image,
+                      fit: BoxFit.cover,
+                    )
+                  : Icon(Icons.music_note, size: 20),
             ),
             SizedBox(width: 16),
             Expanded(

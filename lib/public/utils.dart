@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
+import 'package:universal_html/html.dart' as html;
 
 ///
 /// Utils
@@ -26,5 +29,22 @@ class Utils {
     return base64Encode(bytes)
         .replaceAll(new RegExp(r'/'), '')
         .substring(0, length);
+  }
+
+  static Future<Uint8List> htmlFileToBytes(html.File file) {
+    var reader = html.FileReader();
+    var completer = Completer<Uint8List>();
+
+    reader.onLoadEnd.listen((event) {
+      Uint8List bytes = reader.result;
+      completer.complete(bytes);
+    });
+
+    reader.onError.listen((event) {
+      completer.completeError(event);
+    });
+
+    reader.readAsArrayBuffer(file);
+    return completer.future;
   }
 }
