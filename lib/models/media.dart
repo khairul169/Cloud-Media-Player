@@ -1,3 +1,4 @@
+import 'package:cmp/public/config.dart';
 import 'package:cmp/services/media_player.dart';
 
 class Media {
@@ -27,15 +28,20 @@ class Media {
   });
 
   factory Media.fromJson(dynamic json) {
+    // Urls
+    var url = Config.API_URL + 'media/get/' + json['media_fname'];
+    var image =
+        Config.API_URL + 'media/cover/' + (json['cover_fname'] ?? 'default');
+
     return Media(
       id: json['id'],
       title: json['title'],
       artist: json['artist'],
       album: json['album'],
       year: json['year'],
-      image: json['image'],
       duration: json['duration'],
-      url: json['url'],
+      url: url,
+      image: image,
     );
   }
 
