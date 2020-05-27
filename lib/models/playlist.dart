@@ -2,15 +2,32 @@ import 'package:cmp/models/media.dart';
 import 'package:cmp/services/media_player.dart';
 
 class Playlist {
+  final int id;
+  final String title;
+  final String description;
+  final String subtitle;
+  final int playTime;
   final List<Media> items;
 
-  Playlist({this.items});
+  Playlist({
+    this.id,
+    this.title,
+    this.description,
+    this.subtitle,
+    this.playTime,
+    this.items,
+  });
 
-  factory Playlist.fromMedia(Media item) => Playlist(items: [item]);
+  factory Playlist.fromJson(dynamic json) => Playlist(
+      id: json['id'],
+      title: json['title'],
+      description: json['description'],
+      subtitle: json['subtitle'],
+      playTime: json['play_time'],
+      items: parseItems(json['items']));
 
-  factory Playlist.fromJson(dynamic json) {
-    var itemList = List.from(json).map((item) => Media.fromJson(item)).toList();
-    return Playlist(items: itemList);
+  static List<Media> parseItems(items) {
+    return List.from(items).map((item) => Media.fromJson(item)).toList();
   }
 
   List<MediaPlayerItem> toMediaQueue() {
@@ -20,8 +37,22 @@ class Playlist {
         .toList();
   }
 
-  Playlist copyWith({List<Media> items}) {
-    return Playlist(items: items ?? this.items);
+  Playlist copyWith({
+    int id,
+    String title,
+    String description,
+    String subtitle,
+    int playTime,
+    List<Media> items,
+  }) {
+    return Playlist(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      subtitle: subtitle ?? this.subtitle,
+      playTime: playTime ?? this.playTime,
+      items: items ?? this.items,
+    );
   }
 
   Playlist add(Media media) {

@@ -7,31 +7,31 @@ class AppState {
   final Playlist playbackList;
 
   /// User playlist
-  final List<Playlist> userPlaylists;
+  final List<Playlist> playlists;
 
   AppState({
     this.playback,
     this.playbackList,
-    this.userPlaylists,
+    this.playlists,
   });
 
   factory AppState.initialState() {
     return AppState(
       playback: PlaybackState(),
       playbackList: Playlist(),
-      userPlaylists: null,
+      playlists: null,
     );
   }
 
   AppState copyWith({
     PlaybackState playback,
     Playlist playbackList,
-    List<Playlist> userPlaylists,
+    List<Playlist> playlists,
   }) {
     return AppState(
       playback: playback ?? this.playback,
       playbackList: playbackList ?? this.playbackList,
-      userPlaylists: userPlaylists ?? this.userPlaylists,
+      playlists: playlists ?? this.playlists,
     );
   }
 }

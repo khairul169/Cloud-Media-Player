@@ -1,10 +1,19 @@
+import 'package:cmp/models/playlist.dart';
+import 'package:cmp/public/utils.dart';
 import 'package:cmp/views/presentation/action_button.dart';
 import 'package:cmp/views/presentation/circle_shape.dart';
 import 'package:flutter/material.dart';
 
 class PlaylistItem extends StatelessWidget {
+  final Playlist item;
+  final Function onPress;
+  final Function onPlay;
+
   const PlaylistItem({
     Key key,
+    this.item,
+    this.onPress,
+    this.onPlay,
   }) : super(key: key);
 
   @override
@@ -25,28 +34,30 @@ class PlaylistItem extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Playlist'),
+                  Text(item.title ?? 'Playlist'),
                   SizedBox(height: 4),
                   Text(
-                    'Glow, AI Kotoba, ...',
+                    item.subtitle ?? '',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.caption,
                   ),
                 ],
               ),
             ),
             Text(
-              '0:00',
+              Utils.timeToString(item.playTime),
               style: TextStyle(color: Colors.white.withOpacity(0.8)),
             ),
             SizedBox(width: 8),
             ActionButton(
               icon: Icons.play_arrow,
-              onPress: () {},
+              onPress: onPlay,
             )
           ],
         ),
       ),
-      onTap: () {},
+      onTap: onPress,
     );
   }
 }

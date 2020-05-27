@@ -6,23 +6,25 @@ import 'package:cmp/services/media_storage.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:universal_html/html.dart' as html;
 
-class FetchUserPlaylist extends ReduxAction<AppState> {
+class FetchPlaylists extends ReduxAction<AppState> {
   @override
   Future<AppState> reduce() async {
     try {
       // Fetch media list
-      var result = await APIHelper.get('media');
+      var result = await APIHelper.get('playlist');
       if (result.isError) throw Exception(result.message);
 
-      var playlist = Playlist.fromJson(result.data);
+      // Parse playlists
+      var playlists =
+          List.from(result.data).map((e) => Playlist.fromJson(e)).toList();
 
-      // Check offline availability
-      playlist = playlist.copyWith(
-        items: await MediaStorage.checkAll(playlist.items),
-      );
+      // Check offline media
+      playlists = await Future.wait(playlists.map((item) async {
+        return item.copyWith(items: await MediaStorage.checkAll(item.items));
+      }));
 
       // Update state
-      dispatch(SetUserPlaylists([playlist]));
+      dispatch(SetPlaylists(playlists));
     } catch (error) {
       // Error catched
       print(error);
@@ -32,11 +34,11 @@ class FetchUserPlaylist extends ReduxAction<AppState> {
   }
 }
 
-class UserPlaylistAddItem extends ReduxAction<AppState> {
+class PlaylistAddItem extends ReduxAction<AppState> {
   final int index;
   final dynamic item;
 
-  UserPlaylistAddItem(this.index, this.item);
+  PlaylistAddItem(this.index, this.item);
 
   Future<void> uploadFileWeb(html.File file) async {
     // Create a placeholder
@@ -48,11 +50,11 @@ class UserPlaylistAddItem extends ReduxAction<AppState> {
   }
 
   void placeholder(String title) {
-    var playlist = state.userPlaylists[index];
+    var playlist = state.playlists[index];
     var placeholder = Media(title: title, waiting: true);
 
     // Add placeholder item
-    dispatch(UserPlaylistReplace(
+    dispatch(PlaylistReplace(
       index,
       playlist.add(placeholder),
     ));
@@ -65,23 +67,24 @@ class UserPlaylistAddItem extends ReduxAction<AppState> {
     }
 
     // Refresh playlist
-    await dispatchFuture(FetchUserPlaylist());
+    await dispatchFuture(FetchPlaylists());
     return null;
   }
 }
 
-class UserPlaylistDeleteItem extends ReduxAction<AppState> {
+class PlaylistDeleteItem extends ReduxAction<AppState> {
   final int playlistIndex;
   final int index;
 
-  UserPlaylistDeleteItem(this.playlistIndex, this.index);
+  PlaylistDeleteItem(this.playlistIndex, this.index);
 
   @override
   Future<AppState> reduce() async {
+    /*
     // Remove playlist item
     var playlist = state.userPlaylists[playlistIndex];
 
-    dispatch(UserPlaylistReplace(
+    dispatch(PlaylistReplace(
       playlistIndex,
       playlist.remove(index),
     ));
@@ -91,31 +94,32 @@ class UserPlaylistDeleteItem extends ReduxAction<AppState> {
       await APIHelper.post('media/delete/$mediaId', null);
     }
 
-    dispatch(FetchUserPlaylist());
+    dispatch(FetchPlaylists());
+    */
     return null;
   }
 }
 
-class UserPlaylistReplace extends ReduxAction<AppState> {
+class PlaylistReplace extends ReduxAction<AppState> {
   final int index;
   final Playlist playlist;
 
-  UserPlaylistReplace(this.index, this.playlist);
+  PlaylistReplace(this.index, this.playlist);
 
   @override
   AppState reduce() {
-    var playlists = state.userPlaylists;
+    var playlists = state.playlists;
     playlists[index] = playlist;
-    return state.copyWith(userPlaylists: playlists);
+    return state.copyWith(playlists: playlists);
   }
 }
 
-class SetUserPlaylists extends ReduxAction<AppState> {
+class SetPlaylists extends ReduxAction<AppState> {
   final List<Playlist> items;
-  SetUserPlaylists(this.items);
+  SetPlaylists(this.items);
 
   @override
   AppState reduce() {
-    return state.copyWith(userPlaylists: items);
+    return state.copyWith(playlists: items);
   }
 }

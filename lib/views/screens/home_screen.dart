@@ -1,6 +1,8 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:cmp/actions/user_playlist.dart';
+import 'package:cmp/actions/playback.dart';
+import 'package:cmp/actions/playlists.dart';
 import 'package:cmp/models/media.dart';
+import 'package:cmp/models/playlist.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
 import 'package:cmp/views/containers/playback_panel_view.dart';
@@ -24,13 +26,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> onRefresh() async {
-    await StoreProvider.dispatchFuture(context, FetchUserPlaylist());
+    await StoreProvider.dispatchFuture(context, FetchPlaylists());
   }
 
   Future<void> onFilesDropped(List<html.File> files) async {
     for (var file in files) {
       print('Uploading ' + file.name);
-      await StoreProvider.dispatchFuture(context, UserPlaylistAddItem(0, file));
+      await StoreProvider.dispatchFuture(context, PlaylistAddItem(0, file));
     }
   }
 
@@ -87,7 +89,21 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Playlist',
           onMore: () {},
         ),
-        PlaylistLibrary(),
+        StoreConnector<AppState, List<Playlist>>(
+          converter: (store) => store.state.playlists,
+          builder: (_, items) => PlaylistLibrary(
+            items: items,
+            onPress: (playlist) {
+              //Navigator.
+            },
+            onPlay: (playlist) {
+              StoreProvider.dispatch(
+                context,
+                SetPlaybackList(playlist, playId: 0),
+              );
+            },
+          ),
+        ),
         SizedBox(height: 24),
         SectionTitle(
           title: 'Local Media',
@@ -106,7 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
   StoreConnector<AppState, List<Media>> buildMediaList() {
     return StoreConnector<AppState, List<Media>>(
       converter: (store) {
-        var playlists = store.state.userPlaylists;
+        var playlists = store.state.playlists;
         if (playlists != null && playlists.length > 0) {
           return playlists[0].items;
         }
@@ -115,7 +131,7 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (_, mediaList) => MediaListView(
         items: mediaList,
         onDelete: (id) {
-          StoreProvider.dispatch(context, UserPlaylistDeleteItem(0, id));
+          StoreProvider.dispatch(context, PlaylistDeleteItem(0, id));
         },
       ),
     );
