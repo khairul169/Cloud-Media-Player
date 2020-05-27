@@ -1,4 +1,5 @@
 import 'package:cmp/models/playlist.dart';
+import 'package:cmp/views/presentation/circle_progress.dart';
 import 'package:cmp/views/presentation/playlist_item.dart';
 import 'package:flutter/material.dart';
 
@@ -17,7 +18,17 @@ class PlaylistLibrary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items == null) {
-      return Container();
+      return SizedBox(
+        height: 96,
+        child: Center(child: CircleProgress(size: 48)),
+      );
+    }
+
+    if (items.length == 0) {
+      return SizedBox(
+        height: 96,
+        child: Center(child: Text('No Media')),
+      );
     }
 
     return ListView.builder(

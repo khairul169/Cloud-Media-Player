@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 
 class MediaListItem extends StatelessWidget {
   final Media item;
-  final VoidCallback onPress;
-  final VoidCallback onMenu;
+  final Function onPress;
+  final Function onMenu;
 
   const MediaListItem({
     Key key,
@@ -42,7 +42,9 @@ class MediaListItem extends StatelessWidget {
             buildIndicator(),
             SizedBox(width: 16),
             Text(
-              Utils.timeToString(item.duration.toInt()),
+              item.duration != null
+                  ? Utils.timeToString(item.duration.toInt())
+                  : '',
               style: TextStyle(color: Colors.white.withOpacity(0.8)),
             ),
             SizedBox(width: 8),

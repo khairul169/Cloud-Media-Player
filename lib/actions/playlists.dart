@@ -45,8 +45,11 @@ class PlaylistAddItem extends ReduxAction<AppState> {
     var title = file.name;
     placeholder(title.substring(0, title.lastIndexOf('.')));
 
+    var playlist = state.playlists[index];
+    var body = {'playlist_id': playlist.id.toString()};
+
     await Future.delayed(Duration(milliseconds: 500));
-    await APIHelper.uploadFile('media/upload', file);
+    await APIHelper.uploadFile('media/upload', file, body: body);
   }
 
   void placeholder(String title) {

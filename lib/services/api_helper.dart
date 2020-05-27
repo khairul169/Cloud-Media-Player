@@ -55,12 +55,17 @@ class APIHelper {
   static Future<http.Response> uploadFile(
     String url,
     dynamic file, {
+    Map<String, String> body,
     Function(int, int) onProgress,
   }) async {
     if (file == null) return null;
 
     final uri = Uri.parse(Config.API_URL + url);
     final request = new FileUploader(uri, onProgress: onProgress);
+
+    if (body != null) {
+      request.fields.addAll(body);
+    }
 
     if (file is File) {
       await request.addFile('media', file);

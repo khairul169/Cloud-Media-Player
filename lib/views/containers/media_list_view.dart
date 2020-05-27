@@ -4,19 +4,23 @@ import 'package:cmp/actions/playback.dart';
 import 'package:cmp/models/media.dart';
 import 'package:cmp/models/playlist.dart';
 import 'package:cmp/services/media_storage.dart';
-import 'package:cmp/views/presentation/circle_progress.dart';
-import 'package:cmp/views/presentation/media_list_item.dart';
+import 'package:cmp/views/presentation/circle_shape.dart';
+import 'package:cmp/views/presentation/media_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class MediaListView extends StatefulWidget {
   final List<Media> items;
+  final bool shrinkWrap;
+  final int maxItems;
   final Function(int index) onDelete;
 
   MediaListView({
     Key key,
     @required this.items,
-    @required this.onDelete,
+    this.shrinkWrap,
+    this.maxItems,
+    this.onDelete,
   }) : super(key: key);
 
   @override
@@ -61,70 +65,66 @@ class _MediaListViewState extends State<MediaListView> {
 
   @override
   Widget build(BuildContext context) {
-    if (widget.items == null) {
-      return SizedBox(
-        height: 200,
-        child: Center(child: CircleProgress(size: 48)),
-      );
-    }
-
-    if (widget.items.length == 0) {
-      return SizedBox(
-        height: 48,
-        child: Center(child: Text('No Media')),
-      );
-    }
-
     // Update stream items
     _itemsController.add(widget.items);
 
     return StreamBuilder(
       stream: _itemsController.stream,
       initialData: widget.items,
-      builder: (_, snapshot) => ListView.builder(
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemCount: widget.items.length,
-        itemBuilder: (_, i) => buildMediaListItem(context, snapshot.data, i),
-      ),
+      builder: (_, snapshot) => buildMediaList(context, snapshot.data),
     );
   }
 
-  Widget buildMediaListItem(
-    BuildContext context,
-    List<Media> items,
-    int index,
-  ) {
-    if (index < 0 || index >= items.length) {
-      return Container();
-    }
+  Widget buildMediaList(BuildContext context, List<Media> items) {
+    var maxItems = widget.maxItems;
+    var mediaList = maxItems != null && maxItems < items.length
+        ? items.sublist(0, maxItems)
+        : items;
 
-    var item = items[index];
-    return MediaListItem(
-      item: item,
-      onPress: () {
+    return MediaList(
+      items: mediaList,
+      shrinkWrap: widget.shrinkWrap,
+      onPress: (index) {
         onStartMedia(context, items, index);
       },
-      onMenu: () {
-        showItemMenu(context, item, index);
+      onMenu: (index) {
+        var item = items[index];
+        showModalBottomSheet(
+          context: context,
+          builder: (ctx) => Wrap(children: buildItemMenu(ctx, item, index)),
+        );
       },
     );
   }
 
-  void showItemMenu(BuildContext context, Media item, int index) {
-    showModalBottomSheet(
-      context: context,
-      builder: (ctx) => Wrap(
-        children: getItemMenu(ctx, item, index),
-      ),
-    );
-  }
-
-  List<Widget> getItemMenu(BuildContext ctx, Media item, int index) {
+  List<Widget> buildItemMenu(BuildContext ctx, Media item, int index) {
     return [
+      Container(
+        padding: EdgeInsets.fromLTRB(16, 24, 16, 16),
+        child: Column(
+          children: [
+            Center(
+              child: CircleShape(
+                size: 64,
+                child: item.image != null
+                    ? Image.network(item.image, fit: BoxFit.cover)
+                    : Icon(Icons.music_note),
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              item.title ?? '',
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.headline6,
+            ),
+          ],
+        ),
+      ),
       ListTile(
         leading: Icon(Icons.favorite_border),
-        title: Text('Mark Favorite'),
+        title: Text('Favorite'),
         onTap: () {
           Navigator.pop(ctx);
         },
@@ -132,23 +132,25 @@ class _MediaListViewState extends State<MediaListView> {
       !kIsWeb
           ? ListTile(
               leading: Icon(Icons.file_download),
-              title: Text(item.localPath != null
-                  ? 'Remove Downloaded'
-                  : 'Download Media'),
+              title:
+                  Text(item.localPath != null ? 'Remove Download' : 'Download'),
               onTap: () {
                 onDownload(index);
                 Navigator.pop(ctx);
               },
             )
           : Container(),
-      ListTile(
-        leading: Icon(Icons.delete_outline),
-        title: Text('Delete'),
-        onTap: () {
-          widget.onDelete(index);
-          Navigator.pop(ctx);
-        },
-      ),
+      widget.onDelete != null
+          ? ListTile(
+              leading: Icon(Icons.delete_outline),
+              title: Text('Delete'),
+              onTap: () {
+                widget.onDelete(index);
+                Navigator.pop(ctx);
+              },
+            )
+          : Container(),
+      SizedBox(height: 8),
     ];
   }
 }

@@ -1,17 +1,15 @@
 import 'package:async_redux/async_redux.dart';
-import 'package:cmp/actions/playback.dart';
 import 'package:cmp/actions/playlists.dart';
-import 'package:cmp/models/media.dart';
 import 'package:cmp/models/playlist.dart';
 import 'package:cmp/states/app_state.dart';
 import 'package:cmp/views/containers/media_list_view.dart';
-import 'package:cmp/views/containers/playback_panel_view.dart';
-import 'package:cmp/views/presentation/file_dropzone.dart';
+import 'package:cmp/views/containers/playlists_view.dart';
 import 'package:cmp/views/presentation/navigation_bar.dart';
-import 'package:cmp/views/presentation/playlist_library.dart';
+import 'package:cmp/views/presentation/playback_panel_wrap.dart';
 import 'package:cmp/views/presentation/section_title.dart';
+import 'package:cmp/views/screens/playlist_screen.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart' as html;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -29,13 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
     await StoreProvider.dispatchFuture(context, FetchPlaylists());
   }
 
-  Future<void> onFilesDropped(List<html.File> files) async {
-    for (var file in files) {
-      print('Uploading ' + file.name);
-      await StoreProvider.dispatchFuture(context, PlaylistAddItem(0, file));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,20 +42,14 @@ class _HomeScreenState extends State<HomeScreen> {
           )
         ],
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: onRefresh,
-              child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: buildContent(context),
-              ),
-            ),
+      body: PlaybackPanelWrap(
+        child: RefreshIndicator(
+          onRefresh: onRefresh,
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: buildContent(context),
           ),
-          PlaybackPanelView(),
-        ],
+        ),
       ),
     );
   }
@@ -89,51 +74,48 @@ class _HomeScreenState extends State<HomeScreen> {
           title: 'Playlist',
           onMore: () {},
         ),
-        StoreConnector<AppState, List<Playlist>>(
-          converter: (store) => store.state.playlists,
-          builder: (_, items) => PlaylistLibrary(
-            items: items,
-            onPress: (playlist) {
-              //Navigator.
-            },
-            onPlay: (playlist) {
-              StoreProvider.dispatch(
-                context,
-                SetPlaybackList(playlist, playId: 0),
-              );
-            },
-          ),
+        PlaylistsView(
+          maxItems: 3,
         ),
-        SizedBox(height: 24),
-        SectionTitle(
-          title: 'Local Media',
-          onMore: () {},
-        ),
-        FileDropZone(
-          child: buildMediaList(),
-          hoverColor: Colors.blue.withOpacity(0.5),
-          onDrop: (files) => onFilesDropped(files),
-        ),
+        buildPlaylistsMedia(),
         SizedBox(height: 16),
       ],
     );
   }
 
-  StoreConnector<AppState, List<Media>> buildMediaList() {
-    return StoreConnector<AppState, List<Media>>(
+  Widget buildPlaylistsMedia() {
+    return StoreConnector<AppState, List<Playlist>>(
       converter: (store) {
-        var playlists = store.state.playlists;
-        if (playlists != null && playlists.length > 0) {
-          return playlists[0].items;
-        }
-        return null;
+        return store.state.playlists;
       },
-      builder: (_, mediaList) => MediaListView(
-        items: mediaList,
-        onDelete: (id) {
-          StoreProvider.dispatch(context, PlaylistDeleteItem(0, id));
-        },
-      ),
+      builder: (_, lists) {
+        if (lists == null) {
+          return Container();
+        }
+        return Wrap(
+          children: List.generate(lists.length, (index) {
+            var playlist = lists[index];
+            return Column(
+              children: [
+                SizedBox(height: 24),
+                SectionTitle(
+                  title: playlist.title,
+                  onMore: () {
+                    Navigator.of(context).push(CupertinoPageRoute(
+                      builder: (_) => PlaylistScreen(playlistIndex: index),
+                    ));
+                  },
+                ),
+                MediaListView(
+                  items: playlist.items,
+                  shrinkWrap: true,
+                  maxItems: 5,
+                ),
+              ],
+            );
+          }),
+        );
+      },
     );
   }
 }
