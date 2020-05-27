@@ -83,22 +83,22 @@ class PlaylistDeleteItem extends ReduxAction<AppState> {
 
   @override
   Future<AppState> reduce() async {
-    /*
     // Remove playlist item
-    var playlist = state.userPlaylists[playlistIndex];
+    var playlist = state.playlists[playlistIndex];
+    if (playlist == null) {
+      return null;
+    }
 
-    dispatch(PlaylistReplace(
-      playlistIndex,
-      playlist.remove(index),
-    ));
+    // Remove item
+    dispatch(PlaylistReplace(playlistIndex, playlist.remove(index)));
 
     var mediaId = playlist.items[index].id;
     if (mediaId != null) {
-      await APIHelper.post('media/delete/$mediaId', null);
+      var body = {'media_id': mediaId};
+      await APIHelper.post('playlist/items/$playlistIndex/remove', body);
     }
 
     dispatch(FetchPlaylists());
-    */
     return null;
   }
 }

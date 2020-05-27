@@ -58,7 +58,10 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     return MediaListView(
       items: items,
       onDelete: (id) {
-        StoreProvider.dispatch(context, PlaylistDeleteItem(0, id));
+        StoreProvider.dispatch(
+          context,
+          PlaylistDeleteItem(widget.playlistIndex, id),
+        );
       },
     );
   }
